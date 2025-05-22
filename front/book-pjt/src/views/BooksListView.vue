@@ -26,3 +26,7 @@ onMounted(() => {
     })
 })
 </script>
+<style>
+.book-section h2 { font-weight: 600; font-size: 1.5rem; margin-bottom: 16px; }
+.book-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--gap); }
+</style>
