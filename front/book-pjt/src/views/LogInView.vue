@@ -27,7 +27,7 @@ const onLogIn = function () {
     password: password.value,
 
   };
-  store.LogIn(info)
+  store.logIn(info)
 };
 </script>
 
