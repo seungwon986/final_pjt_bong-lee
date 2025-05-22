@@ -1,7 +1,30 @@
 import requests
+from datetime import datetime
+from .models import Book, Category
 
 API_URL = 'http://www.aladin.co.kr/ttb/api/ItemList.aspx'
 API_KEY = 'ttbtmddnjs36641349002'
+
+# ✅ 정규화 카테고리 매핑 기준
+CATEGORY_KEYWORDS = {
+    "문학": ["소설", "시", "희곡"],
+    "인문": ["인문학", "교양", "철학"],
+    "사회과학": ["정치", "사회", "행정", "외교"],
+    "과학": ["과학", "공학", "수학"],
+    "자기계발": ["자기계발", "성공", "CEO", "리더"],
+    "에세이": ["에세이", "수필"],
+    "만화": ["만화", "웹툰"],
+    "예술": ["예술", "영화", "음악", "디자인"],
+    "경제/경영": ["경제", "경영", "비즈니스"],
+    "종교/역사": ["종교", "역사"],
+}
+
+def normalize_category(category_name):
+    for main_category, keywords in CATEGORY_KEYWORDS.items():
+        for keyword in keywords:
+            if keyword in category_name:
+                return main_category
+    return "기타"
 
 def fetch_bestsellers_from_aladin(total_count=100):
     all_items = []
@@ -16,15 +39,55 @@ def fetch_bestsellers_from_aladin(total_count=100):
             'MaxResults': per_page,
             'Start': start,
             'SearchTarget': 'Book',
-            'Output': 'JS',
+            'Output': 'js',
             'Version': 20131101,
+            'CategoryId': '0',
+            'Cover': 'Big',
         }
 
         response = requests.get(API_URL, params=params)
         if response.status_code == 200:
-            items = response.json().get('item', [])
-            all_items.extend(items)
+            try:
+                items = response.json().get('item', [])
+                all_items.extend(items)
+            except Exception as e:
+                print(f"[ERROR] JSON decode error on page {page + 1}: {e}")
         else:
             print(f"[ERROR] Page {page + 1} failed: {response.status_code}")
 
     return all_items
+
+def import_books_from_aladin():
+    items = fetch_bestsellers_from_aladin()
+    imported = []
+
+    for item in items:
+        isbn = item.get('isbn')
+        if not isbn:
+            continue
+
+        raw_category = item.get('categoryName', '')
+        normalized = normalize_category(raw_category)
+        category_obj, _ = Category.objects.get_or_create(name=normalized)
+
+        try:
+            book, created = Book.objects.get_or_create(
+                isbn=isbn,
+                defaults={
+                    'title': item.get('title'),
+                    'author': item.get('author'),
+                    'pub_date': datetime.strptime(item.get('pubDate'), '%Y-%m-%d').date() if item.get('pubDate') else None,
+                    'cover': item.get('cover'),
+                    'publisher': item.get('publisher'),
+                    'customer_review_rank': item.get('customerReviewRank', 0),
+                    'description': item.get('description', '')[:1000],
+                    'category': category_obj,  # ✅ ForeignKey로 연결
+                }
+            )
+            if created:
+                imported.append(book)
+        except Exception as e:
+            print(f"[ERROR] 책 저장 실패 (ISBN: {isbn}): {e}")
+            continue
+
+    return imported

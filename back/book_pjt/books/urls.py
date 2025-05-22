@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path('', views.book_list),
-    path('import/', views.import_books_from_aladin),
+    path('import/', views.import_books_from_aladin_view),
+    path('categories/', views.category_list),
 ]
