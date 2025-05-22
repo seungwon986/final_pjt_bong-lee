@@ -1,6 +1,6 @@
 <template>
   <div class="container mt-4">
-    <h2 class="mb-4">📚 베스트셀러 목록</h2>
+    <h2 class="mb-4">베스트셀러 목록</h2>
     <div class="row">
       <div class="col-md-4 mb-4" v-for="book in books" :key="book.id">
         <BookCard :book="book" />
