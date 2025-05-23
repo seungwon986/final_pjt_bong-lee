@@ -198,10 +198,6 @@ onMounted(() => {
   align-items: center;
   z-index: 2;
 
-
-  a,
-  button {
-
   a, button {
 
     background: none;
