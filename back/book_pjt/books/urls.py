@@ -7,4 +7,5 @@ urlpatterns = [
     path('categories/', views.category_list),
     path('generate-vectors/', views.generate_book_vectors, name='generate_book_vectors'),
     path('recommend/', views.recommend_books, name='recommend_books'),
+    path('<int:book_id>/', views.book_detail, name='book_detail'),
 ]

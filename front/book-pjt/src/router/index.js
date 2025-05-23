@@ -3,13 +3,13 @@ import Main from '@/views/Main.vue'
 import BooksListView from '@/views/BooksListView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import LogInView from '@/views/LogInView.vue'
-import MyBookListView from '@/views/MyBookListView.vue'
+import MyPageView from '@/views/MyPageView.vue'
 const routes = [
   { path: '/',      name: 'main',       component: Main },
   { path: '/books', name: 'books',      component: BooksListView },
   { path: '/signup',name: 'SignUpView', component: SignUpView },
   { path: '/login', name: 'LogInView',  component: LogInView },
-  { path: '/mybooks', name: 'mybooks', component: MyBookListView },
+  { path: '/MyPage', name: 'MyPage', component: MyPageView },
 ]
 
 export default createRouter({

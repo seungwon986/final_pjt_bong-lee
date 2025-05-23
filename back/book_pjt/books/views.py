@@ -81,3 +81,13 @@ def recommend_books(request):
 
     serializer = BookSerializer(top_books, many=True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+def book_detail(request, book_id):
+    try:
+        book = Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        return Response({'error': '해당 도서를 찾을 수 없습니다.'}, status=404)
+
+    serializer = BookSerializer(book)
+    return Response(serializer.data)

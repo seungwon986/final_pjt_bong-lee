@@ -65,7 +65,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
     preferred_books = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Book.objects.all()
     )
+    profile_image = serializers.ImageField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'nickname', 'preferred_books']
+        fields = ['id', 'username', 'nickname', 'profile_image', 'preferred_books', 'first_name', 'last_name']

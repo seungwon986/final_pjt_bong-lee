@@ -15,8 +15,6 @@
           <RouterLink to="/">홈</RouterLink>
           <RouterLink to="/books">도서 목록</RouterLink>
 
-          <RouterLink to="/mybooks">내 책장</RouterLink>
-
           <RouterLink to="/challenge">챌린지</RouterLink>
           <RouterLink to="/community">커뮤니티</RouterLink>
         </nav>
@@ -24,6 +22,7 @@
         <!-- 우측 메뉴 -->
         <div class="actions">
           <template v-if="store.isLogIn">
+            <RouterLink to="/MyPage"><button>마이페이지</button></RouterLink>
             <button @click="logOut">로그아웃</button>
           </template>
           <template v-else>
@@ -39,10 +38,9 @@
       </div>
     </nav>
 
-    <main class="container py-4">
-      <RouterView />
-      
-    </main>
+<main class="container py-4">
+    <RouterView />
+</main>
   </div>
 </template>
 
