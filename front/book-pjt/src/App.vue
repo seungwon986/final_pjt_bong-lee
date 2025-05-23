@@ -1,3 +1,8 @@
+
+
+
+
+
 <template>
   <div id="nav">
     <nav class="navbar">
@@ -9,7 +14,9 @@
         <nav class="main-nav open-line" :class="{ open: showMenu }">
           <RouterLink to="/">홈</RouterLink>
           <RouterLink to="/books">도서 목록</RouterLink>
+
           <RouterLink to="/mybooks">내 책장</RouterLink>
+
           <RouterLink to="/challenge">챌린지</RouterLink>
           <RouterLink to="/community">커뮤니티</RouterLink>
         </nav>
@@ -20,8 +27,10 @@
             <button @click="logOut">로그아웃</button>
           </template>
           <template v-else>
+
             <RouterLink to="/login">로그인</RouterLink>
             <RouterLink to="/signup">회원가입</RouterLink>
+
           </template>
         </div>
 
@@ -37,11 +46,14 @@
   </div>
 </template>
 
+
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
 import { useAccountStore } from "@/stores/accounts.js";
+
 import { ref, onMounted } from "vue";
 import axios from "axios";
+
 
 const store = useAccountStore();
 const showMenu = ref(false);
@@ -85,7 +97,7 @@ onMounted(() => {
   padding: 0;
 }
 
-/* 네비게이션 바 */
+
 .navbar {
   margin-top: 20px;
   padding-bottom: 20px;
@@ -103,7 +115,7 @@ onMounted(() => {
   position: relative;
 }
 
-/* 로고 */
+
 .logo {
   font-size: 1.5rem;
   font-weight: 700;
@@ -112,7 +124,7 @@ onMounted(() => {
   z-index: 2;
 }
 
-/* 중앙 메뉴 */
+
 .main-nav {
   display: flex;
   gap: 24px;
@@ -141,12 +153,14 @@ onMounted(() => {
       transition: 0.4s ease-in-out;
     }
 
+
     &::before {
       top: 0;
     }
     &::after {
       bottom: -2px;
     }
+
 
     &:hover {
       letter-spacing: 0.1em;
@@ -176,7 +190,6 @@ onMounted(() => {
   }
 }
 
-/* 우측 메뉴 */
 .actions {
   position: absolute;
   right: 24px;
@@ -185,8 +198,12 @@ onMounted(() => {
   align-items: center;
   z-index: 2;
 
+
   a,
   button {
+
+  a, button {
+
     background: none;
     border: none;
     color: #555;
@@ -201,7 +218,7 @@ onMounted(() => {
   }
 }
 
-/* 햄버거 버튼 */
+
 .hamburger {
   display: none;
   background: none;
@@ -211,7 +228,7 @@ onMounted(() => {
   z-index: 3;
 }
 
-/* 반응형 */
+
 @media (max-width: 768px) {
   .main-nav {
     display: none;
@@ -235,3 +252,4 @@ onMounted(() => {
   }
 }
 </style>
+
