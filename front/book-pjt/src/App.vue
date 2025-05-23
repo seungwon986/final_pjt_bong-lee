@@ -38,7 +38,7 @@ import axios from 'axios'
 
 const store = useAccountStore();
 const logOut = function () {
-  store.LogOut();
+  store.logOut();
 };
 onMounted(() => {
   axios.post('http://127.0.0.1:8000/api/v1/books/import/')

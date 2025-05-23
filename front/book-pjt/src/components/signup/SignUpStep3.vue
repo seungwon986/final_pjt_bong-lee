@@ -1,11 +1,11 @@
 <template>
   <div>
-    <p>선택한 카테고리 기반으로 선호 도서를 골라주세요</p>
+    <h3>선택한 카테고리 기반으로 선호 도서를 골라주세요</h3>
     <div class="row row-cols-1 row-cols-md-3 g-4">
       <div class="col" v-for="book in books" :key="book.id">
         <div
           class="card h-100"
-          :class="{ 'border-primary': internalModel.includes(book.id) }"
+          :class="{ 'border-primary': selected.includes(book.id) }"
           @click="toggle(book.id)"
         >
           <img :src="book.cover" class="card-img-top" alt="book cover" />
@@ -16,61 +16,64 @@
         </div>
       </div>
     </div>
-    <div class="mt-3">
+
+    <div class="mt-4 d-flex justify-content-between">
       <button class="btn btn-secondary" @click="$emit('prev')">이전</button>
-      <button class="btn btn-primary" @click="$emit('next')">회원가입</button>
+      <button class="btn btn-primary" @click="handleNext">다음</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 
-// ✅ props: selectedBooks (v-model) & selectedCategories (for filtering)
 const props = defineProps({
-  selectedBooks: {
-    type: Array,
-    default: () => []
-  },
-  selectedCategories: {
-    type: Array,
-    default: () => []
-  }
+  form: Object
 })
-
-// ✅ emits: selectedBooks 업데이트, 단계 이동
-const emit = defineEmits(['update:selectedBooks', 'prev', 'next'])
+const emit = defineEmits(['next', 'prev'])
 
 const books = ref([])
-const internalModel = ref([]) // 내부 선택 상태
+const selected = ref([])
 
-// ✅ props로 받은 초기 선택 상태 반영
-onMounted(() => {
-  internalModel.value = [...props.selectedBooks]
-
-  if (props.selectedCategories.length === 0) return
-
-  const query = props.selectedCategories.map((c) => `category=${c}`).join('&')
-  axios.get(`http://127.0.0.1:8000/api/v1/books/?${query}`)
-    .then((res) => {
-      books.value = res.data
-    })
-    .catch((err) => {
-      console.error('도서 불러오기 실패', err)
-    })
-})
-
-// ✅ internalModel이 바뀌면 selectedBooks로 emit
-watch(internalModel, () => {
-  emit('update:selectedBooks', internalModel.value)
-})
-
-const toggle = (id) => {
-  if (internalModel.value.includes(id)) {
-    internalModel.value = internalModel.value.filter((i) => i !== id)
+const toggle = (bookId) => {
+  const idx = selected.value.indexOf(bookId)
+  if (idx === -1) {
+    selected.value.push(bookId)
   } else {
-    internalModel.value.push(id)
+    selected.value.splice(idx, 1)
   }
 }
+
+const handleNext = () => {
+  if (selected.value.length === 0) {
+    alert('선호하는 도서를 한 권 이상 선택해주세요.')
+    return
+  }
+
+  props.form.preferred_books = selected.value
+  emit('next')
+}
+
+const fetchBooksByCategories = () => {
+  const categoryIds = props.form.preferred_categories
+  if (!categoryIds || categoryIds.length === 0) return
+
+  axios.get('http://127.0.0.1:8000/api/v1/books/')
+    .then(res => {
+      books.value = res.data.filter(book =>
+        categoryIds.includes(book.category)
+      )
+    })
+    .catch(err => console.error('도서 불러오기 실패:', err))
+}
+
+onMounted(fetchBooksByCategories)
+watch(() => props.form.preferred_categories, fetchBooksByCategories, { immediate: true })
 </script>
+
+<style scoped>
+.card {
+  cursor: pointer;
+}
+</style>
