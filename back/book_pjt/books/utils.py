@@ -1,6 +1,8 @@
 import requests
 from datetime import datetime
 from .models import Book, Category
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
 
 API_URL = 'http://www.aladin.co.kr/ttb/api/ItemList.aspx'
 API_KEY = 'ttbtmddnjs36641349002'
@@ -26,13 +28,13 @@ def normalize_category(category_name):
                 return main_category
     return "기타"
 
-def fetch_bestsellers_from_aladin(total_count=100):
+def fetch_bestsellers_from_aladin(total_count=200):
     all_items = []
     per_page = 50
     pages = (total_count + per_page - 1) // per_page
 
     for page in range(pages):
-        start = page * per_page + 1
+        start = page
         params = {
             'TTBKey': API_KEY,
             'QueryType': 'Bestseller',
@@ -91,3 +93,30 @@ def import_books_from_aladin():
             continue
 
     return imported
+
+def process_book_vectors():
+    books = Book.objects.filter(vector__isnull=True)  # ✅ 벡터가 없는 책만 선택
+    if not books.exists():
+        print("[INFO] 모든 책에 벡터가 이미 존재합니다.")
+        return
+
+    texts = []
+    book_list = []
+
+    for book in books:
+        text = f"{book.title or ''} {book.author or ''} {book.category.name if book.category else ''} {book.description or ''}"
+        texts.append(text)
+        book_list.append(book)
+
+    if not texts:
+        print("[INFO] 벡터화할 텍스트가 없습니다.")
+        return
+
+    vectorizer = TfidfVectorizer(stop_words='english')
+    vectors = vectorizer.fit_transform(texts).toarray()
+
+    for i, book in enumerate(book_list):
+        book.vector = vectors[i].tolist()
+        book.save()
+
+    print(f"[INFO] {len(book_list)}권의 벡터가 새로 생성되었습니다.")

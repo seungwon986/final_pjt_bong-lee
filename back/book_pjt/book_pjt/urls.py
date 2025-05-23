@@ -24,5 +24,9 @@ urlpatterns = [
     path('api/v1/books/', include('books.urls')),
     path('accounts/', include('dj_rest_auth.urls')),
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
+
+    # 🔧 여기에 추가
+    path('accounts/', include('accounts.urls')),  # ✅ 사용자 profile API 포함
 ]
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
