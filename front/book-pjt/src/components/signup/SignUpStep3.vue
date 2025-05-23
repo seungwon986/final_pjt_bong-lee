@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>선택한 카테고리 기반으로 선호 도서를 골라주세요</h3>
+    <p>선택한 카테고리 기반으로 선호 도서를 골라주세요</p>
     <div class="row row-cols-1 row-cols-md-3 g-4">
       <div class="col" v-for="book in books" :key="book.id">
         <div
@@ -15,11 +15,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="mt-4 d-flex justify-content-between">
-      <button class="btn btn-secondary" @click="$emit('prev')">이전</button>
-      <button class="btn btn-primary" @click="handleNext">다음</button>
     </div>
   </div>
 </template>
@@ -61,9 +56,10 @@ const fetchBooksByCategories = () => {
 
   axios.get('http://127.0.0.1:8000/api/v1/books/')
     .then(res => {
-      books.value = res.data.filter(book =>
-        categoryIds.includes(book.category)
-      )
+     books.value = res.data.filter(book => {
+  const bookCategoryId = typeof book.category === 'object' ? book.category.id : book.category
+  return categoryIds.map(Number).includes(Number(bookCategoryId))
+})
     })
     .catch(err => console.error('도서 불러오기 실패:', err))
 }
@@ -75,5 +71,8 @@ watch(() => props.form.preferred_categories, fetchBooksByCategories, { immediate
 <style scoped>
 .card {
   cursor: pointer;
+}
+p {
+  text-align: center;
 }
 </style>

@@ -11,10 +11,10 @@
       <li class="list-group-item"><strong>선호 도서:</strong> {{ bookTitles.join(', ') }}</li>
     </ul>
 
-    <div class="mt-4 d-flex justify-content-between">
+    <!-- <div class="mt-4 d-flex justify-content-between">
       <button class="btn btn-secondary" @click="$emit('prev')">이전</button>
       <button class="btn btn-success" @click="submitForm">회원가입 완료</button>
-    </div>
+    </div> -->
   </div>
 </template>
 
