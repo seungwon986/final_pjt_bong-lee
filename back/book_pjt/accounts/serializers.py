@@ -4,6 +4,7 @@ from rest_framework.validators import UniqueValidator
 from .models import User
 from books.models import Category, Book
 
+# ✅ 회원가입 시 사용자 추가 필드 입력
 class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField(max_length=30, required=False)
     last_name = serializers.CharField(max_length=30, required=False)
@@ -15,7 +16,6 @@ class CustomRegisterSerializer(RegisterSerializer):
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all(), message="이미 사용 중인 닉네임입니다.")]
     )
-
 
     preferred_categories = serializers.ListField(
         child=serializers.IntegerField(), required=False
@@ -58,3 +58,14 @@ class CustomRegisterSerializer(RegisterSerializer):
             user.preferred_books.set(Book.objects.filter(id__in=cleaned_data["preferred_books"]))
 
         return user
+
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    preferred_books = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Book.objects.all()
+    )
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'nickname', 'preferred_books']

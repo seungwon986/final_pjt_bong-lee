@@ -14,7 +14,9 @@
         <nav class="main-nav open-line" :class="{ open: showMenu }">
           <RouterLink to="/">홈</RouterLink>
           <RouterLink to="/books">도서 목록</RouterLink>
-          <RouterLink to="/profile">내 책장</RouterLink>
+
+          <RouterLink to="/mybooks">내 책장</RouterLink>
+
           <RouterLink to="/challenge">챌린지</RouterLink>
           <RouterLink to="/community">커뮤니티</RouterLink>
         </nav>
@@ -25,8 +27,10 @@
             <button @click="logOut">로그아웃</button>
           </template>
           <template v-else>
-            <RouterLink to="/login">로그인</RouterLink> 
-            <RouterLink to="/signup">회원가입</RouterLink> 
+
+            <RouterLink to="/login">로그인</RouterLink>
+            <RouterLink to="/signup">회원가입</RouterLink>
+
           </template>
         </div>
 
@@ -37,6 +41,7 @@
 
     <main class="container py-4">
       <RouterView />
+      
     </main>
   </div>
 </template>
@@ -45,14 +50,16 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
 import { useAccountStore } from "@/stores/accounts.js";
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+
+import { ref, onMounted } from "vue";
+import axios from "axios";
+
 
 const store = useAccountStore();
 const showMenu = ref(false);
 
 const logOut = () => {
-  store.LogOut();
+  store.logOut();
 };
 
 const toggleMenu = () => {
@@ -61,16 +68,23 @@ const toggleMenu = () => {
 
 // 책 자동 불러오기 (초기 렌더링 시)
 onMounted(() => {
-  axios.post('http://127.0.0.1:8000/api/v1/books/import/')
-    .then(res => {
-      console.log(res.data.message || '책 불러오기 완료');
+  axios
+    .post("http://127.0.0.1:8000/api/v1/books/import/")
+    .then((res) => {
+      console.log(res.data.message || "책 불러오기 완료");
     })
-    .catch(err => {
-      console.error('책 불러오기 실패:', err);
+    .catch((err) => {
+      console.error("책 불러오기 실패:", err);
     });
 });
-</script>
 
+onMounted(() => {
+  axios
+    .post("http://127.0.0.1:8000/api/v1/books/generate-vectors/")
+    .then(() => console.log("✅ 벡터 생성 완료"))
+    .catch((err) => console.error("❌ 벡터 생성 실패", err));
+});
+</script>
 
 <style scoped lang="scss">
 :root {
@@ -139,8 +153,14 @@ onMounted(() => {
       transition: 0.4s ease-in-out;
     }
 
-    &::before { top: 0; }
-    &::after { bottom: -2px; }
+
+    &::before {
+      top: 0;
+    }
+    &::after {
+      bottom: -2px;
+    }
+
 
     &:hover {
       letter-spacing: 0.1em;
@@ -170,7 +190,6 @@ onMounted(() => {
   }
 }
 
-
 .actions {
   position: absolute;
   right: 24px;
@@ -179,7 +198,12 @@ onMounted(() => {
   align-items: center;
   z-index: 2;
 
+
+  a,
+  button {
+
   a, button {
+
     background: none;
     border: none;
     color: #555;

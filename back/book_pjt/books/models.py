@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import JSONField 
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -15,6 +16,7 @@ class Book(models.Model):
     cover = models.URLField(blank=True)
     description = models.TextField(blank=True)
     customer_review_rank = models.PositiveIntegerField(default=0)
+    vector = models.JSONField(null=True, blank=True)
 
 
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)

@@ -1,5 +1,5 @@
 <template>
-  <div class="card h-100 shadow-sm border-0">
+  <div class="card h-100 shadow-sm border-0 position-relative">
     <img
       :src="book.cover"
       class="card-img-top object-fit"
@@ -13,6 +13,16 @@
         <span class="badge bg-warning text-dark">⭐ {{ book.customer_review_rank }}</span>
       </div>
     </div>
+
+    <!-- ⭐ 우측 상단 즐겨찾기 토글 (선택적 렌더링) -->
+    <span
+      v-if="showFavorite"
+      class="position-absolute top-0 end-0 p-2 fs-4"
+      style="cursor: pointer;"
+      @click="$emit('toggle-favorite', book.id)"
+    >
+      {{ isPreferredComputed ? '★' : '☆' }}
+    </span>
   </div>
 </template>
 
@@ -20,13 +30,20 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  book: Object
+  book: Object,
+  isPreferred: {
+    type: Boolean,
+    default: undefined  // undefined일 경우 표시하지 않음
+  }
 })
 
 const formattedDate = computed(() => {
   if (!props.book.pub_date) return ''
   return new Date(props.book.pub_date).toLocaleDateString('ko-KR')
 })
+
+const showFavorite = computed(() => props.isPreferred !== undefined)
+const isPreferredComputed = computed(() => props.isPreferred)
 </script>
 
 <style scoped>
