@@ -13,7 +13,7 @@
 
     <div class="mt-4 d-flex justify-content-between">
       <button class="btn btn-secondary" @click="$emit('prev')">이전</button>
-      <button class="btn btn-success" @click="submitForm">회원가입 완료</button>
+      <button class="btn btn-success" @click="$emit('submit')">회원가입 완료</button>
     </div>
   </div>
 </template>
@@ -21,18 +21,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import { useAccountStore } from '@/stores/accounts.js'
 
-const props = defineProps({
-  form: Object
-})
-const store = useAccountStore()
+const props = defineProps({ form: Object })
+const emit = defineEmits(['submit', 'prev'])
 
 const categoryNames = ref([])
 const bookTitles = ref([])
 
 onMounted(() => {
-  // 카테고리 이름 불러오기
   axios.get('http://127.0.0.1:8000/api/v1/books/categories/')
     .then(res => {
       const map = {}
@@ -40,7 +36,6 @@ onMounted(() => {
       categoryNames.value = props.form.preferred_categories.map(id => map[id]).filter(Boolean)
     })
 
-  // 도서 제목 불러오기
   axios.get('http://127.0.0.1:8000/api/v1/books/')
     .then(res => {
       const map = {}
@@ -48,40 +43,22 @@ onMounted(() => {
       bookTitles.value = props.form.preferred_books.map(id => map[id]).filter(Boolean)
     })
 })
-
-const submitForm = () => {
-  const {
-    username, password1, password2, nickname, first_name, last_name,
-    gender, birth, preferred_categories, preferred_books, profile_image
-  } = props.form
-
-  // 유효성 검증
-  if (!username || !password1 || !password2 || !nickname || !first_name || !last_name || !gender || !birth || !preferred_categories.length || !preferred_books.length) {
-    alert('모든 항목을 올바르게 입력했는지 확인해주세요.')
-    return
-  }
-
-  // FormData로 전환
-  const data = new FormData()
-  data.append('username', username)
-  data.append('password1', password1)
-  data.append('password2', password2)
-  data.append('nickname', nickname)
-  data.append('first_name', first_name)
-  data.append('last_name', last_name)
-  data.append('gender', gender)
-  data.append('birth', birth)
-
-  preferred_categories.forEach(cat => data.append('preferred_categories', cat))
-  preferred_books.forEach(book => data.append('preferred_books', book))
-
-  if (profile_image) {
-    data.append('profile_image', profile_image)
-  }
-
-  store.signUp(data)
-}
 </script>
 
 <style scoped>
+.list-group {
+  font-size: 0.95rem;
+  padding: 0;
+}
+
+.list-group-item {
+  padding: 0.75rem 1rem;
+  border: 1px solid #eee;
+  margin-bottom: 6px;
+}
+
+.btn {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
 </style>

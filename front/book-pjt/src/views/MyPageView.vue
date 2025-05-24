@@ -1,5 +1,5 @@
 <template>
-  <div class="container py-4">
+  <div v-if="user" class="container py-4">
     <h2 class="mb-4">📖 마이페이지</h2>
 
     <div class="row">
@@ -33,12 +33,12 @@
       <h5>📚 내 취향 책 (내 책장)</h5>
       <div class="row row-cols-1 row-cols-md-3 g-4">
         <BookCard
-          v-for="book in books"
-          :key="book.id"
-          :book="book"
-          :is-preferred="true"
-          @toggle-preferred="togglePreferred"
-        />
+        v-for="book in mergedBooks"
+        :key="book.id"
+        :book="book"
+        :is-preferred="user.preferred_books.includes(book.id)"
+        @toggle-preferred="togglePreferred"
+      />
       </div>
     </div>
 
@@ -46,7 +46,11 @@
       <div class="col-md-6 mb-4">
         <div class="border p-3">
           <h5>🔥 참여한 챌린지</h5>
-          <p class="text-muted">챌린지 요약 정보 or 카드</p>
+          <ul>
+            <li v-for="challenge in joinedChallenges" :key="challenge.id">
+              {{ challenge.title }} ({{ challenge.participants.length }}명 참여)
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -60,6 +64,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import axios from 'axios'
@@ -68,7 +73,17 @@ import BookCard from '@/components/BookCard.vue'
 
 const store = useAccountStore()
 const user = computed(() => store.user)
-const books = ref([])
+const preferredBooks = ref([])
+const likedBooks = ref([])
+const joinedChallenges = ref([])
+
+// 🎯 통합된 도서 리스트 (중복 제거)
+const mergedBooks = computed(() => {
+  const map = new Map()
+  preferredBooks.value.forEach(book => map.set(book.id, book))
+  likedBooks.value.forEach(book => map.set(book.id, book))
+  return Array.from(map.values())
+})
 
 const imageUrl = (path) => {
   if (!path) return '/default-profile.png'
@@ -77,18 +92,45 @@ const imageUrl = (path) => {
 }
 
 const fetchPreferredBooks = async (bookIds) => {
-  if (!bookIds || bookIds.length === 0) {
-    books.value = []
+  if (!bookIds?.length) {
+    preferredBooks.value = []
     return
   }
   try {
     const promises = bookIds.map(id =>
       axios.get(`http://127.0.0.1:8000/api/v1/books/${id}/`)
+        .then(res => res.data)
+        .catch(err => {
+          console.warn(`도서 ${id} 로드 실패`, err)
+          return null
+        })
     )
-    const responses = await Promise.all(promises)
-    books.value = responses.map(res => res.data)
+    const books = await Promise.all(promises)
+    preferredBooks.value = books.filter(Boolean)
   } catch (err) {
-    console.error('도서 정보 불러오기 실패:', err)
+    console.error('전체 도서 정보 불러오기 실패:', err)
+  }
+}
+
+const fetchLikedBooks = async () => {
+  try {
+    const res = await axios.get('http://127.0.0.1:8000/api/v1/books/favorites/', {
+      headers: { Authorization: `Token ${store.token}` }
+    })
+    likedBooks.value = res.data
+  } catch (err) {
+    console.error('좋아요 도서 불러오기 실패:', err)
+  }
+}
+
+const fetchJoinedChallenges = async () => {
+  try {
+    const res = await axios.get('http://127.0.0.1:8000/api/v1/challenges/my/', {
+      headers: { Authorization: `Token ${store.token}` }
+    })
+    joinedChallenges.value = res.data
+  } catch (err) {
+    console.error('참여한 챌린지 불러오기 실패:', err)
   }
 }
 
@@ -107,7 +149,6 @@ const togglePreferred = async (bookId) => {
 
     await store.fetchUserProfile()
     fetchPreferredBooks(store.user.preferred_books)
-
   } catch (err) {
     console.error('선호 도서 토글 실패:', err)
   }
@@ -116,7 +157,10 @@ const togglePreferred = async (bookId) => {
 onMounted(async () => {
   await store.fetchUserProfile()
   fetchPreferredBooks(store.user.preferred_books)
+  fetchLikedBooks()
+  fetchJoinedChallenges()
 })
+
 </script>
 
 <style scoped>

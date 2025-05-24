@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>관심 있는 카테고리를 선택하세요</h3>
+    <p>관심 있는 카테고리를 선택하세요</p>
     <div class="row row-cols-2 row-cols-md-4 g-3">
       <div
         class="col"
@@ -9,17 +9,15 @@
         @click="toggleCategory(category.id)"
       >
         <div
-          class="card h-100 text-center p-2"
+          class="card text-center h-100 p-2"
           :class="{ 'border-primary': selected.includes(category.id) }"
         >
           {{ category.name }}
         </div>
       </div>
     </div>
-
-    <div class="mt-4 d-flex justify-content-between">
-      <button class="btn btn-secondary" @click="$emit('prev')">이전</button>
-      <button class="btn btn-primary" @click="handleNext">다음</button>
+    <div class="mt-4 d-flex justify-content-end">
+      <button @click.prevent="handleNext" class="btn btn-primary">다음</button>
     </div>
   </div>
 </template>
@@ -31,7 +29,6 @@ import axios from 'axios'
 const props = defineProps({
   form: Object
 })
-
 const emit = defineEmits(['next', 'prev'])
 
 const categories = ref([])
@@ -51,7 +48,6 @@ const handleNext = () => {
     alert('관심 있는 카테고리를 한 개 이상 선택해주세요.')
     return
   }
-
   props.form.preferred_categories = selected.value
   emit('next')
 }
@@ -59,7 +55,11 @@ const handleNext = () => {
 onMounted(() => {
   axios.get('http://127.0.0.1:8000/api/v1/books/categories/')
     .then(res => {
-      categories.value = res.data
+      const categoryData = res.data || []
+      categories.value = categoryData
+      if (props.form.preferred_categories?.length > 0) {
+        selected.value = [...props.form.preferred_categories]
+      }
     })
     .catch(err => {
       console.error('카테고리 불러오기 실패:', err)
@@ -68,7 +68,29 @@ onMounted(() => {
 </script>
 
 <style scoped>
+p {
+  text-align: center;
+}
 .card {
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 12px 18px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+p {
+  text-align: center;
+  padding-bottom: 50px;
+}
+
+.card:hover {
+  background: #f07ac834;
+}
+.card.border-primary {
+  border: 2px solid #f36faa;
+  background-color: #eec1d6;
+  color: #ee5f9f;
+  font-weight: bold;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 </style>

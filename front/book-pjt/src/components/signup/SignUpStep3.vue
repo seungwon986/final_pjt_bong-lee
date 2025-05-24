@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>선택한 카테고리 기반으로 선호 도서를 골라주세요</h3>
+    <p>관심 있는 카테고리 기반으로 선호 도서를 골라주세요</p>
     <div class="row row-cols-1 row-cols-md-3 g-4">
       <div class="col" v-for="book in books" :key="book.id">
         <div
@@ -16,10 +16,9 @@
         </div>
       </div>
     </div>
-
     <div class="mt-4 d-flex justify-content-between">
-      <button class="btn btn-secondary" @click="$emit('prev')">이전</button>
-      <button class="btn btn-primary" @click="handleNext">다음</button>
+      <button type="button" class="btn btn-secondary" @click="emit('prev')">이전</button>
+      <button type="button" class="btn btn-primary" @click="handleNext">다음</button>
     </div>
   </div>
 </template>
@@ -50,7 +49,6 @@ const handleNext = () => {
     alert('선호하는 도서를 한 권 이상 선택해주세요.')
     return
   }
-
   props.form.preferred_books = selected.value
   emit('next')
 }
@@ -61,9 +59,10 @@ const fetchBooksByCategories = () => {
 
   axios.get('http://127.0.0.1:8000/api/v1/books/')
     .then(res => {
-      books.value = res.data.filter(book =>
-        categoryIds.includes(book.category)
-      )
+      books.value = res.data.filter(book => {
+        const bookCategoryId = typeof book.category === 'object' ? book.category.id : book.category
+        return categoryIds.map(Number).includes(Number(bookCategoryId))
+      })
     })
     .catch(err => console.error('도서 불러오기 실패:', err))
 }
@@ -75,5 +74,51 @@ watch(() => props.form.preferred_categories, fetchBooksByCategories, { immediate
 <style scoped>
 .card {
   cursor: pointer;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card.border-primary {
+  border: 2px solid #fc47b0;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card-img-top {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 0.8rem;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;         /* 제목 2줄 제한 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  min-height: 2.8em;             /* 높이 고정 */
+}
+
+.card-text {
+  font-size: 0.7rem;
+  color: #555;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;         /* 저자명 1줄 제한 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
+
