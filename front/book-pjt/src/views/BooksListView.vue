@@ -29,7 +29,7 @@
             <div class="title-wrap">
               <h3 class="book-title clamp">{{ book.title }}</h3>
               <label class="heart-label">
-                <input type="checkbox" v-model="book.isBookmarked" class="heart-checkbox">
+                <input type="checkbox" :checked="isLiked(book.id)" @change="toggleBookmark(book.id)" class="heart-checkbox">
                 <svg class="icon" viewBox="0 0 1024 1024">
                   <path class="heart-path"
                     d="M742.4 101.12A249.6 249.6 0 0 0 512 256a249.6
@@ -63,17 +63,24 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
+import { useAccountStore } from '@/stores/accounts.js'
 
+const store = useAccountStore()
 const books = ref([])
 const activeGenre = ref('전체')
 const route = useRoute()
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-onMounted(() => {
+const likedBookIds = ref([])
+
+onMounted(async () => {
+  await store.fetchUserProfile()
+  likedBookIds.value = store.user?.preferred_books || []
+
   axios.get('http://127.0.0.1:8000/api/v1/books/')
     .then(res => {
-      books.value = res.data.map(book => ({ ...book, isBookmarked: false }))
+      books.value = res.data
     })
     .catch(err => {
       console.error('책 불러오기 실패:', err)
@@ -120,7 +127,35 @@ watch(
 function formattedDate(dateString) {
   return new Date(dateString).toLocaleDateString('ko-KR')
 }
+
+function isLiked(bookId) {
+  return likedBookIds.value.includes(bookId)
+}
+
+async function toggleBookmark(bookId) {
+  const current = [...likedBookIds.value]
+  const index = current.indexOf(bookId)
+  if (index === -1) {
+    current.push(bookId)
+  } else {
+    current.splice(index, 1)
+  }
+  likedBookIds.value = current
+
+  try {
+    await axios.patch('http://127.0.0.1:8000/accounts/profile/', {
+      preferred_books: current
+    }, {
+      headers: { Authorization: `Token ${store.token}` }
+    })
+
+    await store.fetchUserProfile()
+  } catch (err) {
+    console.error('북마크 저장 실패:', err)
+  }
+}
 </script>
+
 
 <style scoped>
 
@@ -137,22 +172,23 @@ function formattedDate(dateString) {
   overflow: visible;
 }
 .recommendations {
-  text-align: center;
+  text-align: left;
   padding: 3rem 1rem 3rem;
   background-color: none;
 }
 .banner-title {
   font-size: 6rem;
-  font-weight: 900;
-  text-align: center;
+  font-weight: 300;
+  text-align: lefr;
   letter-spacing: -0.05em;
   margin-bottom: 0;
 }
 .banner-subtitle {
   font-size: 3rem;
   font-weight: 300;
-  text-align: center;
+  text-align: left;
   margin-top: -0.5rem;
+  padding-left: 10px;
   color: #333;
 }
 .book-list-container {
@@ -174,7 +210,8 @@ function formattedDate(dateString) {
   overflow: visible;
 }
 .subtitle {
-  text-align: center;
+  padding-left: 30px;
+  text-align: left;
   color: #888;
   margin-bottom: 2rem;
 }
@@ -184,6 +221,9 @@ function formattedDate(dateString) {
   gap: 0.5rem;
   justify-content: center;
   margin-bottom: 2rem;
+  padding-top: 50px;
+  padding-bottom: 20px;
+
 }
 .category-tab {
   border: 1px solid #303331;
@@ -203,12 +243,12 @@ function formattedDate(dateString) {
 .book-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 한 줄에 2개 고정 */
-  border-top: 1px solid #ddd;
-  border-left: 1px solid #ddd;
+  border-top: 1px solid #303030;
+  border-left: 1px solid #303030;
 }
 .book-card {
-  border-right: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #303030;
+  border-bottom: 1px solid #303030;
   padding: 2rem;
   background-color: #fff;
   transition: transform 0.2s ease;
@@ -306,6 +346,7 @@ svg.icon {
   object-fit: contain;
   border-radius: 0.2rem;
   flex-shrink: 0;
+cursor: pointer;
 }
 .book-info {
   flex-grow: 1;
@@ -315,6 +356,8 @@ svg.icon {
   position: relative;
 }
 .book-title {
+cursor: pointer;
+
   font-size: 1.1rem;
   font-weight: bold;
   line-height: 1.4;

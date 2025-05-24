@@ -53,9 +53,9 @@
         <input type="file" id="profile_image" class="form-control" @change="onFileChange" accept="image/*">
       </div>
 
-      <!-- <div class="mt-4 d-flex justify-content-end">
+      <div class="mt-4 d-flex justify-content-end">
         <button type="submit" class="btn btn-primary">다음</button>
-      </div> -->
+      </div>
     </form>
   </div>
 </template>

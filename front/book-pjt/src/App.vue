@@ -28,9 +28,6 @@
             </div>
           </div>
 
-          <div class="dropdown">
-            <RouterLink to="/profile" class="nav-link">내 책장</RouterLink>
-          </div>
 
           <div class="dropdown">
             <RouterLink to="/challenge" class="nav-link">챌린지</RouterLink>
@@ -48,8 +45,10 @@
         </div>
 
         <!-- 우측 메뉴 -->
-        <div class="actions">
+         
+       <div class="actions">
           <template v-if="store.isLogIn">
+            <RouterLink to="/mypage" class="nav-link">마이 페이지</RouterLink>
             <button @click="logOut">로그아웃</button>
           </template>
           <template v-else>
@@ -58,14 +57,17 @@
           </template>
         </div>
 
+
         <!-- 햄버거 메뉴 버튼 (모바일용) -->
         <button class="hamburger" @click="toggleMenu">☰</button>
       </div>
     </nav>
 
     <main class="container py-4">
-      <RouterView />
-    </main>
+  <transition name="fade" mode="out-in">
+    <RouterView />
+  </transition>
+</main>
   </div>
 </template>
 
@@ -77,7 +79,7 @@ import axios from 'axios';
 
 const store = useAccountStore();
 const showMenu = ref(false);
-const logOut = () => store.LogOut();
+const logOut = () => store.logOut();
 const toggleMenu = () => (showMenu.value = !showMenu.value);
 
 onMounted(() => {
@@ -88,13 +90,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@font-face {
-  font-family: 'Pretendard';
-  src: url('../../assets/fonts/Pretendard-Regular.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
+
 
 body {
   font-family: 'Pretendard', sans-serif;
@@ -110,7 +106,7 @@ body {
   --dropdown-bg: transparent;
   --dropdown-hover-bg: rgba(0, 0, 0, 0.05);
   --submenu-bg: #fff;
-  --accent-color: #44d7b6;
+  --accent-color: #4ef748;
 }
 
 .navbar {
@@ -212,20 +208,30 @@ body {
   }
 }
 
-.actions a,
-.actions button {
-  font-size: 0.9rem;
-  padding: 6px 10px;
-  color: #666;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s ease;
+.actions {
+  display: flex; /* ✅ 버튼들을 가로로 정렬 */
+  gap: 16px;     /* ✅ 버튼 사이 간격 */
+  align-items: center; /* ✅ 세로 중앙 정렬 */
+  right: 24px;
+  z-index: 2;
 
-  &:hover {
-    color: var(--accent-color);
+  a,
+  button {
+    font-size: 0.9rem;
+    vertical-align: middle;
+    padding: 6px 10px;
+    color: #666;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--accent-color);
+    }
   }
 }
+
 
 .hamburger {
   display: none;
@@ -271,4 +277,21 @@ body {
   color: #000;
   font-weight: 600;
 }
+
+/* 화면 전환 페이드 효과 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px); /* 밑에서 살짝 올라오는 느낌 */
+}
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 </style>
