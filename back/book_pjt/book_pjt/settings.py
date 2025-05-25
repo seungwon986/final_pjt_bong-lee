@@ -35,6 +35,7 @@ ALLOWED_HOSTS = []
 # settings.py
 
 INSTALLED_APPS = [
+    'challenges',
     'books',
     'accounts',
     'rest_framework',

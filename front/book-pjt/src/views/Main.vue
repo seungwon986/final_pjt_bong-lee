@@ -2,6 +2,7 @@
     <div class="main-container">
 
       <div class="best-container">
+        <Recommend />
         <BestSeller />
       </div>
     
@@ -49,7 +50,7 @@ import { RouterLink } from 'vue-router'
 // import HeroSection from '@/components/main/HeroSection.vue'
 // import CategoryButtons from '@/components/main/CategoryButtons.vue'
 import BestSeller from '@/components/main/BestSeller.vue'
-
+import Recommend from '@/components/main/Recommend.vue'
 
 
 const challenges = ref([])

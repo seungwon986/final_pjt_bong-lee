@@ -91,3 +91,13 @@ def book_detail(request, book_id):
 
     serializer = BookSerializer(book)
     return Response(serializer.data)
+
+@api_view(['POST'])
+def preferred_books_list(request):
+    preferred_ids = request.data.get('preferred_books', [])
+    if not preferred_ids:
+        return Response({'error': 'preferred_books 값이 필요합니다.'}, status=400)
+
+    books = Book.objects.filter(id__in=preferred_ids)
+    serializer = BookSerializer(books, many=True)
+    return Response(serializer.data)

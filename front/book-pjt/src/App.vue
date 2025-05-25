@@ -30,10 +30,10 @@
 
 
           <div class="dropdown">
-            <RouterLink to="/challenge" class="nav-link">챌린지</RouterLink>
+            <RouterLink to="/challenges" class="nav-link">챌린지</RouterLink>
             <div class="dropdown-content">
               <ol>
-                <li><RouterLink to="/challenge/list">챌린지 목록</RouterLink></li>
+                <li><RouterLink to="/challenges">챌린지 목록</RouterLink></li>
                 <li><RouterLink to="/challenge/create">챌린지 만들기</RouterLink></li>
               </ol>
             </div>
