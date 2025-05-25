@@ -7,6 +7,11 @@ import SignUpView from '@/views/SignUpView.vue'
 import MyPageView from '@/views/MyPageView.vue'
 import LogInView from '@/views/LogInView.vue'
 import ChallengeListView from '@/views/ChallengeListView.vue'
+
+
+import ChallengeDetailView from '@/views/ChallengeDetailView.vue'
+import CommunityView from '@/views/CommunityView.vue'
+
 import ChallengeCreateView from '@/views/ChallengeCreateView.vue'
 
 const routes = [
@@ -15,9 +20,21 @@ const routes = [
   { path: '/signup', name: 'signup', component: SignUpView },
   { path: '/login', name: 'login', component: LogInView },
   { path: '/mypage', name: 'MyPage', component: MyPageView, meta: { requiresAuth: true } },
+
   { path: '/challenge', name: 'challenge-list', component: ChallengeListView },
   { path: '/challenge/list', redirect: { name: 'challenge-list' } },
   { path: '/challenge/create', name: 'challenge-create', component: ChallengeCreateView },
+
+  { path: '/challenges', name: 'ChallengeList', component: ChallengeListView },
+  { path: '/challenges/:id', name: 'ChallengeDetail', component: ChallengeDetailView, props: true },
+  { path: '/community', name: 'community', component: CommunityView },
+  {
+  path: '/challenge/create',
+  name: 'ChallengeCreate',
+  component: ChallengeCreateView,
+  meta: { requiresAuth: true },
+}
+
 ]
 
 const router = createRouter({
@@ -25,7 +42,6 @@ const router = createRouter({
   routes,
 })
 
-// 🔐 전역 가드 추가
 router.beforeEach((to, from, next) => {
   const store = useAccountStore()
   if (to.meta.requiresAuth && !store.isLogIn) {

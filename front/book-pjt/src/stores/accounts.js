@@ -21,7 +21,7 @@ export const useAccountStore = defineStore(
         data: payload,
         headers: isFormData ? {} : { "Content-Type": "application/json" },
       })
-        .then(() => router.push("/login"))
+        .then(() => router.push("/"))
         .catch((err) => {
           console.error("회원가입 실패:", err.response?.data || err.message);
           throw err;

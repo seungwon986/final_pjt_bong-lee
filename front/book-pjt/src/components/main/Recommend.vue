@@ -17,7 +17,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import axios from 'axios'
-import BookCard from './BookCard.vue'
+import BookCard from '../BookCard.vue'
 import { useAccountStore } from '@/stores/accounts.js'
 
 const books = ref([])

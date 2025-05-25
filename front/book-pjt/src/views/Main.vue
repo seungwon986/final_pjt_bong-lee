@@ -14,11 +14,32 @@
       </Swiper>
     </div>
 
+
     <div class="below-hero-bg">
       <div class="main-container">
         <!-- 베스트셀러 슬라이더 섹션 -->
         <div class="best-container section-observe" ref="bestSection">
           <BestSeller :books="bestSellers" />
+
+      <div class="best-container">
+        <Recommend />
+        <BestSeller />
+      </div>
+    
+       <div class="row-section">
+      <!-- 챌린지 -->
+      <div class="half-section challenge-box">
+        <h2 class="section-title">📢 진행 중인 챌린지</h2>
+        <div class="slider-wrapper">
+          <button class="slide-btn left" @click="slideLeftChallenge">‹</button>
+          <div class="slider" ref="challengeSlider">
+            <div class="card" v-for="c in challenges" :key="c.id">
+              <h4 class="title">{{ c.title }}</h4>
+              <p class="intro">{{ c.intro }}</p>
+            </div>
+          </div>
+          <button class="slide-btn right" @click="slideRightChallenge">›</button>
+
         </div>
 
         <!-- 진행 중인 챌린지 -->
@@ -47,6 +68,12 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { RouterLink } from 'vue-router'
+
+// import HeroSection from '@/components/main/HeroSection.vue'
+// import CategoryButtons from '@/components/main/CategoryButtons.vue'
+import BestSeller from '@/components/main/BestSeller.vue'
+import Recommend from '@/components/main/Recommend.vue'
+
 
 // Swiper for Hero
 import { Swiper, SwiperSlide } from 'swiper/vue'
