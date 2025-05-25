@@ -1,6 +1,6 @@
 <template>
+  <h2 class="section-title">베스트셀러</h2>
   <div class="bestseller-section">
-    <h2 class="section-title">베스트셀러</h2>
 
     <div class="category-tabs">
       <button
@@ -74,7 +74,7 @@ onMounted(() => {
 }
 
 .section-title {
-  font-size: 1.2rem;
+  font-size: 1.8rem;
   font-weight: 500;
   text-align: left;
   margin-bottom: 1.2rem;

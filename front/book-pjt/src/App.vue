@@ -1,9 +1,12 @@
 <template>
-  <div id="nav">
+  <div class="nav-wrapper">
     <nav class="navbar">
       <div class="container nav-container">
+
         <!-- 로고 -->
-        <RouterLink to="/" class="logo">BookNest</RouterLink>
+        <div class="left">
+          <RouterLink to="/" class="logo">BookNest</RouterLink>
+        </div>
 
         <!-- 중앙 메뉴 -->
         <div class="main-nav" :class="{ open: showMenu }">
@@ -28,7 +31,6 @@
             </div>
           </div>
 
-
           <div class="dropdown">
             <RouterLink to="/challenge" class="nav-link">챌린지</RouterLink>
             <div class="dropdown-content">
@@ -39,23 +41,37 @@
             </div>
           </div>
           
-          <div class="dropdown">
-            <RouterLink to="/community" class="nav-link">커뮤니티</RouterLink>
-          </div>
+          
         </div>
 
         <!-- 우측 메뉴 -->
-         
-       <div class="actions">
-          <template v-if="store.isLogIn">
-            <RouterLink to="/mypage" class="nav-link">마이 페이지</RouterLink>
-            <button @click="logOut">로그아웃</button>
-          </template>
-          <template v-else>
-            <RouterLink to="/login">로그인</RouterLink>
-            <RouterLink to="/signup">회원가입</RouterLink>
-          </template>
-        </div>
+         <div class="right">
+           <div class="actions">
+             <template v-if="store.isLogIn">
+               <RouterLink to="/mypage" class="nav-link">마이 페이지</RouterLink>
+               <button @click="logOut">로그아웃</button>
+             </template>
+             <template v-else>
+               <RouterLink
+                  to="/login"
+                  class="nav-link"
+                  active-class=""
+                  exact-active-class=""
+                >
+                  로그인
+                </RouterLink>
+                <RouterLink
+                  to="/signup"
+                  class="nav-link"
+                  active-class=""
+                  exact-active-class=""
+                >
+                  회원가입
+                </RouterLink>
+             </template>
+           </div>
+          </div>
+
 
 
         <!-- 햄버거 메뉴 버튼 (모바일용) -->
@@ -63,11 +79,11 @@
       </div>
     </nav>
 
-    <main class="container py-4">
-  <transition name="fade" mode="out-in">
-    <RouterView />
-  </transition>
-</main>
+    <main class="main-wrapper">
+      <transition name="fade" mode="out-in">
+        <RouterView v-scroll-reveal />
+      </transition>
+    </main>
   </div>
 </template>
 
@@ -76,6 +92,7 @@ import { RouterLink, RouterView } from 'vue-router';
 import { useAccountStore } from '@/stores/accounts.js';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import ScrollReveal from 'scrollreveal';
 
 const store = useAccountStore();
 const showMenu = ref(false);
@@ -86,11 +103,33 @@ onMounted(() => {
   axios.post('http://127.0.0.1:8000/api/v1/books/import/')
     .then(res => console.log(res.data.message || '책 불러오기 완료'))
     .catch(err => console.error('책 불러오기 실패:', err));
+
+  ScrollReveal().reveal('[v-scroll-reveal]', {
+    distance: '20px',
+    origin: 'bottom',
+    duration: 800,
+    interval: 150,
+    opacity: 0,
+    easing: 'ease-out',
+    reset: false,
+  });
 });
 </script>
 
+
 <style lang="scss">
 
+.main-wrapper {
+  width: 100%;
+  max-width: none;     /* ✅ 중앙제한 제거 */
+  padding: 0;          /* ✅ 좌우 여백 제거 */
+}
+:root {
+  --dropdown-bg: transparent;
+  --dropdown-hover-bg: rgba(0, 0, 0, 0.05);
+  --submenu-bg: #fff;
+  --accent-color: #4ef748;
+}
 
 body {
   font-family: 'Pretendard', sans-serif;
@@ -100,31 +139,43 @@ body {
   padding: 0;
   background: #fff;
   color: #222;
+  overflow-x: hidden;
 }
 
-:root {
-  --dropdown-bg: transparent;
-  --dropdown-hover-bg: rgba(0, 0, 0, 0.05);
-  --submenu-bg: #fff;
-  --accent-color: #4ef748;
-}
+
 
 .navbar {
+  width: 100%;
   background: #fff;
+  box-shadow: none;
+}
+.nav-container {
+  max-width: 1800px;
+  margin: 0 auto;
   padding: 0 24px;
   height: 60px;
   display: flex;
   align-items: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid #000;
+  justify-content: space-between;
 }
 
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+.left {
+  flex: 1;
+}
+
+.center {
+  flex: 2;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
 }
 
 .logo {
@@ -133,16 +184,16 @@ body {
   color: #000;
   text-decoration: none;
 }
-
+/* 중앙 메뉴 */
 .main-nav {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
+  margin: 0 auto;
 
-  > .dropdown {
+  .dropdown {
     position: relative;
 
-    > .nav-link {
-      position: relative;
+    .nav-link {
       display: block;
       padding: 16px 20px;
       font-size: 0.95rem;
@@ -164,18 +215,18 @@ body {
       }
     }
 
-    > .dropdown-content {
+    .dropdown-content {
       position: absolute;
       top: 100%;
       left: 0;
       z-index: 300;
-      display: none;
-      transform: translateY(8px);
+      visibility: hidden;
       opacity: 0;
       pointer-events: none;
-      transition: all 0.2s ease;
+      transform: translateY(8px);
+      transition: all 0.3s ease;
 
-      > ol {
+      ol {
         list-style: none;
         margin: 0;
         padding: 0;
@@ -183,7 +234,7 @@ body {
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         border-radius: 0.25rem;
 
-        > li > a {
+        li a {
           display: block;
           padding: 10px 16px;
           color: #444;
@@ -199,32 +250,32 @@ body {
       }
     }
 
-    &:hover > .dropdown-content {
-      display: block;
+    &:hover .dropdown-content {
+      visibility: visible;
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
   }
 }
+  .left {
+    justify-content: flex-start;
+  }
 
+/* 인증 버튼 */
 .actions {
-  display: flex; /* ✅ 버튼들을 가로로 정렬 */
-  gap: 16px;     /* ✅ 버튼 사이 간격 */
-  align-items: center; /* ✅ 세로 중앙 정렬 */
-  right: 24px;
-  z-index: 2;
-
+  display: flex;
+  justify-self: flex;
+  gap: 16px;
   a,
   button {
     font-size: 0.9rem;
-    vertical-align: middle;
-    padding: 6px 10px;
     color: #666;
     background: none;
     border: none;
     cursor: pointer;
     transition: color 0.2s ease;
+    padding: 6px 10px;
 
     &:hover {
       color: var(--accent-color);
@@ -232,7 +283,7 @@ body {
   }
 }
 
-
+/* 햄버거 메뉴 (모바일용) */
 .hamburger {
   display: none;
   font-size: 1.5rem;
@@ -241,6 +292,7 @@ body {
   cursor: pointer;
 }
 
+/* 반응형 */
 @media (max-width: 768px) {
   .hamburger {
     display: block;
@@ -272,13 +324,8 @@ body {
     display: none !important;
   }
 }
-.nav-link.active {
-  border-bottom: 2px solid var(--accent-color);
-  color: #000;
-  font-weight: 600;
-}
 
-/* 화면 전환 페이드 효과 */
+/* 페이드 전환 효과 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.4s ease, transform 0.4s ease;
@@ -286,7 +333,7 @@ body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(10px); /* 밑에서 살짝 올라오는 느낌 */
+  transform: translateY(10px);
 }
 .fade-enter-to,
 .fade-leave-from {
