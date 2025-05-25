@@ -192,9 +192,9 @@ async function toggleBookmark(bookId) {
   color: #333;
 }
 .book-list-container {
-  max-width: 100%;
-  padding: 0;
-  margin: 0 auto;
+  max-width: 1400px; /* 기존 100% → 고정된 최대 너비로 변경 */
+  margin: 0 auto;    /* 중앙 정렬 */
+  padding: 0 1rem;
   background: #fff;
   font-family: 'Pretendard Variable', sans-serif;
 }

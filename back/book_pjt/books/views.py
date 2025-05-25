@@ -1,5 +1,6 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .models import Book
 from .serializers import BookSerializer, CategorySerializer
 from .utils import import_books_from_aladin
@@ -91,6 +92,7 @@ def book_detail(request, book_id):
 
     serializer = BookSerializer(book)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 def preferred_books_list(request):

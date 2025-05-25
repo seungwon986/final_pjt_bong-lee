@@ -62,6 +62,8 @@ function toggleBookmark(book) {
 }
 
 .book-card {
+  min-width: 160px;
+  flex-shrink: 0;
   position: relative;
   background-color: #fff;
   border-radius: 16px;
