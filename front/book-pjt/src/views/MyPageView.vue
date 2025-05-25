@@ -1,21 +1,10 @@
 <template>
-
   <div v-if="user" class="page-container">
     <div class="mypage-dashboard">
+      <!-- 사이드바 -->
       <aside class="sidebar">
         <div class="profile-edit-btn">
           <RouterLink to="/profile/edit" class="edit-icon">⚙️</RouterLink>
-
-  <div v-if="user" class="container py-4">
-    <h2 class="mb-4">📖 마이페이지</h2>
-
-    <!-- 프로필 -->
-    <div class="row">
-      <div class="col-md-3 mb-4">
-        <div class="border p-2 text-center">
-          <img :src="imageUrl(user.profile_image)" alt="프로필" class="img-fluid rounded" />
-          <p class="mt-2 fw-semibold">{{ user.nickname }}</p>
-
         </div>
         <img :src="imageUrl(user.profile_image)" alt="프로필" class="sidebar-avatar" />
         <p class="user-id">{{ user.username }}</p>
@@ -25,20 +14,20 @@
         </p>
       </aside>
 
+      <!-- 메인 콘텐츠 -->
       <section class="main-content">
         <h2 class="page-title">
-          <img src="@/assets/house.png" class="title-icon" alt="house icon" /> {{ user.nickname }}님의 마이페이지
+          <img src="@/assets/house.png" class="title-icon" alt="house icon" />
+          {{ user.nickname }}님의 마이페이지
         </h2>
 
         <!-- 내 책장 -->
         <div class="card shelf-full-card">
           <div class="card-inner">
-            <div class="shelf-header">
-              <h4>내 책장</h4>
+            <div class="shelf-header d-flex justify-content-between align-items-center">
+              <h4>📚 내 책장</h4>
               <RouterLink to="/books" class="bookmark-more-btn">➕ 더 많은 책 북마크 하기</RouterLink>
             </div>
-
-
             <div class="book-grid horizontal-scroll">
               <BookCard
                 v-for="book in mergedBooks"
@@ -51,52 +40,54 @@
           </div>
         </div>
 
-        <!-- 내가 쓴 글 -->
+        <!-- 내가 쓴 글 (향후 확장) -->
         <div class="card info-card">
           <div class="card-inner">
-            <h4>내가 쓴 글</h4>
-            <p class="muted">게시글 카드 or 리스트 삽입 예정</p>
+            <h4>📝 내가 쓴 글</h4>
+            <p class="muted">게시글 카드 또는 리스트로 추가 예정</p>
           </div>
         </div>
 
         <!-- 참여한 챌린지 -->
         <div class="card challenge-card">
           <div class="card-inner">
-            <h4>참여한 챌린지</h4>
+            <h4>💪 참여한 챌린지</h4>
             <ul class="list">
               <li v-for="challenge in joinedChallenges" :key="challenge.id">
                 {{ challenge.title }} ({{ challenge.participants.length }}명 참여)
               </li>
             </ul>
+          </div>
+        </div>
 
-    <!-- 선호 도서 -->
-    <div class="border p-3 mb-4">
-      <h5>📚 내 취향 책 (내 책장)</h5>
-      <div class="book-grid">
-        <div class="book-card" v-for="book in preferredBooks" :key="book.id">
-          <img :src="book.cover || '/default-book-cover.png'" :alt="book.title" class="book-cover" />
-          <div class="book-info">
-            <div class="title-wrap">
-              <h3 class="book-title clamp">{{ book.title }}</h3>
-              <label class="heart-label">
-                <input type="checkbox" :checked="isLiked(book.id)" @change="togglePreferred(book.id)" class="heart-checkbox" />
-                <svg class="icon" viewBox="0 0 1024 1024">
-                  <path
-                    class="heart-path"
-                    d="M742.4 101.12A249.6 249.6 0 0 0 512 256a249.6
-                       249.6 0 0 0-230.72-154.88C143.68 101.12 32 238.4
-                       32 376.32c0 301.44 416 546.56 480 546.56s480-245.12
-                       480-546.56c0-137.92-111.68-275.2-249.6-275.2z"
-                  />
-                </svg>
-                <span class="burst"></span>
-              </label>
+        <!-- 선호 도서 -->
+        <div class="card">
+          <div class="card-inner">
+            <h4>💖 선호 도서</h4>
+            <div class="book-grid">
+              <div class="book-card" v-for="book in preferredBooks" :key="book.id">
+                <img :src="book.cover || '/default-book-cover.png'" :alt="book.title" class="book-cover" />
+                <div class="book-info">
+                  <div class="title-wrap">
+                    <h3 class="book-title clamp">{{ book.title }}</h3>
+                    <label class="heart-label">
+                      <input type="checkbox" :checked="isLiked(book.id)" @change="togglePreferred(book.id)" class="heart-checkbox" />
+                      <svg class="icon" viewBox="0 0 1024 1024">
+                        <path class="heart-path" d="M742.4 101.12A249.6 249.6 0 0 0 512 256a249.6
+                           249.6 0 0 0-230.72-154.88C143.68 101.12 32 238.4
+                           32 376.32c0 301.44 416 546.56 480 546.56s480-245.12
+                           480-546.56c0-137.92-111.68-275.2-249.6-275.2z" />
+                      </svg>
+                      <span class="burst"></span>
+                    </label>
+                  </div>
+                  <p class="book-author">👤 {{ book.author }}</p>
+                  <p class="book-publisher">🏢 {{ book.publisher }}</p>
+                  <p class="book-date">📅 {{ formattedDate(book.pub_date) }}</p>
+                  <p class="book-description">{{ book.description }}</p>
+                </div>
+              </div>
             </div>
-            <p class="book-author">👤 {{ book.author }}</p>
-            <p class="book-publisher">🏢 {{ book.publisher }}</p>
-            <p class="book-date">📅 {{ formattedDate(book.pub_date) }}</p>
-            <p class="book-description">{{ book.description }}</p>
-
           </div>
         </div>
       </section>
@@ -105,10 +96,9 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useAccountStore } from '@/stores/accounts.js'
-
 import BookCard from '@/components/BookCard.vue'
 import defaultAvatar from '@/assets/basic.jpg'
 import { RouterLink } from 'vue-router'
@@ -117,35 +107,11 @@ const store = useAccountStore()
 const user = computed(() => store.user)
 const joinedChallenges = ref([])
 const likedBooks = ref([])
+const preferredBooks = ref([])
 const mergedBooks = computed(() => likedBooks.value)
 
-const imageUrl = path => {
-  return path ? (path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`) : defaultAvatar
-}
-
-const fetchJoinedChallenges = async () => {
-  const res = await axios.get('http://127.0.0.1:8000/api/v1/challenges/my/', {
-    headers: { Authorization: `Token ${store.token}` }
-  })
-  joinedChallenges.value = res.data
-}
-
-const fetchLikedBooks = async () => {
-  try {
-    const res = await axios.get('http://127.0.0.1:8000/api/v1/books/favorites/', {
-      headers: { Authorization: `Token ${store.token}` }
-    })
-    likedBooks.value = res.data
-  } catch (err) {
-    console.error('좋아요 도서 로드 실패:', err)
-
-
-const store = useAccountStore()
-const user = computed(() => store.user)
-const preferredBooks = ref([])
-
 const imageUrl = (path) => {
-  if (!path) return '/default-profile.png'
+  if (!path) return defaultAvatar
   return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`
 }
 
@@ -158,8 +124,28 @@ const formattedDate = (dateString) => {
   })
 }
 
-const isLiked = (bookId) => {
-  return store.user?.preferred_books.includes(bookId)
+const isLiked = (bookId) => store.user?.preferred_books.includes(bookId)
+
+const fetchJoinedChallenges = async () => {
+  try {
+    const res = await axios.get('http://127.0.0.1:8000/api/v1/challenges/my/', {
+      headers: { Authorization: `Token ${store.token}` },
+    })
+    joinedChallenges.value = res.data
+  } catch (err) {
+    console.error('참여한 챌린지 로드 실패:', err)
+  }
+}
+
+const fetchLikedBooks = async () => {
+  try {
+    const res = await axios.get('http://127.0.0.1:8000/api/v1/books/favorites/', {
+      headers: { Authorization: `Token ${store.token}` },
+    })
+    likedBooks.value = res.data
+  } catch (err) {
+    console.error('좋아요 도서 로드 실패:', err)
+  }
 }
 
 const fetchPreferredBooks = async () => {
@@ -175,23 +161,14 @@ const fetchPreferredBooks = async () => {
     preferredBooks.value = res.data
   } catch (err) {
     console.error('선호 도서 정보 불러오기 실패:', err)
-
   }
 }
 
 const togglePreferred = async (bookId) => {
-
   const current = store.user?.preferred_books || []
   const updated = current.includes(bookId)
     ? current.filter(id => id !== bookId)
     : [...current, bookId]
-
-  try {
-    const current = store.user?.preferred_books || []
-    const updated = current.includes(bookId)
-      ? current.filter((id) => id !== bookId)
-      : [...current, bookId]
-
 
   try {
     await axios.patch('http://127.0.0.1:8000/accounts/profile/', {
@@ -200,11 +177,8 @@ const togglePreferred = async (bookId) => {
       headers: { Authorization: `Token ${store.token}` }
     })
     await store.fetchUserProfile()
-
     await fetchLikedBooks()
-
     await fetchPreferredBooks()
-
   } catch (err) {
     console.error('북마크 저장 실패:', err)
   }
@@ -212,13 +186,12 @@ const togglePreferred = async (bookId) => {
 
 onMounted(async () => {
   await store.fetchUserProfile()
-
-  fetchJoinedChallenges()
+  await fetchJoinedChallenges()
   await fetchLikedBooks()
   await fetchPreferredBooks()
-
 })
 </script>
+
 
 <style scoped>
 
@@ -267,7 +240,7 @@ onMounted(async () => {
 .sidebar-avatar {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
+  border-radius: 50%;}
 
 .book-grid {
   display: grid;

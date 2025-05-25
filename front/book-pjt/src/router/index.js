@@ -10,7 +10,7 @@ import ChallengeListView from '@/views/ChallengeListView.vue'
 
 
 import ChallengeDetailView from '@/views/ChallengeDetailView.vue'
-import CommunityView from '@/views/CommunityView.vue'
+// import CommunityView from '@/views/CommunityView.vue'
 
 import ChallengeCreateView from '@/views/ChallengeCreateView.vue'
 
@@ -27,7 +27,7 @@ const routes = [
 
   { path: '/challenges', name: 'ChallengeList', component: ChallengeListView },
   { path: '/challenges/:id', name: 'ChallengeDetail', component: ChallengeDetailView, props: true },
-  { path: '/community', name: 'community', component: CommunityView },
+  // { path: '/community', name: 'community', component: CommunityView },
   {
   path: '/challenge/create',
   name: 'ChallengeCreate',

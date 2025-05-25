@@ -1,5 +1,4 @@
 <template>
-
   <div class="challenge-create-wrapper">
     <h2>챌린지 생성</h2>
     <form @submit.prevent="submitChallenge">
@@ -24,7 +23,7 @@
         </select>
       </div>
 
-      <!-- 도서명 검색 & 자동 추천 -->
+      <!-- 도서명 검색 -->
       <div class="form-group">
         <label for="bookSearch">도서명 검색</label>
         <input
@@ -42,11 +41,11 @@
         </ul>
       </div>
 
-      <!-- 선택된 도서 표시 -->
+      <!-- 선택된 도서 -->
       <div class="form-group" v-if="form.book">
         <label>선택 도서</label>
         <div class="selected-book">
-          <img :src="form.book.cover" alt="{{ form.book.title }}" />
+          <img :src="form.book.cover" :alt="form.book.title" />
           <div class="info">
             <p class="title">{{ form.book.title }}</p>
             <p class="author">{{ form.book.author }}</p>
@@ -57,10 +56,10 @@
       <!-- 소개글 -->
       <div class="form-group">
         <label for="description">소개글</label>
-        <textarea id="description" v-model="form.description" rows="4" required />
+        <textarea id="description" v-model="form.description" rows="4" required></textarea>
       </div>
 
-      <!-- 시작일 & 마감일 선택 -->
+      <!-- 시작일 & 마감일 -->
       <div class="form-group date-group">
         <div>
           <label for="startDate">시작일</label>
@@ -72,7 +71,7 @@
         </div>
       </div>
 
-      <!-- 진행 기간 자동 계산 -->
+      <!-- 진행 기간 -->
       <div class="form-group">
         <label>진행 기간</label>
         <input type="text" :value="duration" readonly />
@@ -80,36 +79,11 @@
 
       <!-- 제출 버튼 -->
       <button type="submit" class="btn-submit">챌린지 생성</button>
-
-  <div class="container py-4">
-    <h2 class="mb-4">📝 챌린지 생성</h2>
-
-    <form @submit.prevent="createChallenge" class="border p-3 rounded shadow-sm">
-      <div class="mb-2">
-        <input v-model="form.title" type="text" class="form-control" placeholder="챌린지 제목" required />
-      </div>
-      <div class="mb-2">
-        <textarea v-model="form.description" class="form-control" placeholder="챌린지 설명" rows="2"></textarea>
-      </div>
-      <div class="row mb-2">
-        <div class="col">
-          <input v-model="form.start_date" type="date" class="form-control" required />
-        </div>
-        <div class="col">
-          <input v-model="form.end_date" type="date" class="form-control" required />
-        </div>
-        <div class="col">
-          <input v-model.number="form.target_books" type="number" class="form-control" placeholder="목표 권수" required />
-        </div>
-      </div>
-      <button type="submit" class="btn btn-success">생성 완료</button>
-
     </form>
   </div>
 </template>
 
 <script setup>
-
 import { ref, reactive, computed, watch } from 'vue'
 import axios from 'axios'
 
@@ -126,7 +100,7 @@ const form = reactive({
   endDate: ''
 })
 
-// 도서 검색 추천 호출
+// 도서 자동완성
 const fetchSuggestions = async () => {
   if (!searchQuery.value) {
     suggestions.value = []
@@ -156,14 +130,14 @@ const duration = computed(() => {
   return `${diff}일`
 })
 
-// 마감일이 시작일 이전이면 초기화
+// 날짜 검증
 watch(() => form.startDate, () => {
   if (form.endDate && form.endDate < form.startDate) {
     form.endDate = ''
   }
 })
 
-// 제출 핸들러
+// 제출 처리
 const submitChallenge = async () => {
   const payload = {
     maxParticipants: form.maxParticipants,
@@ -176,7 +150,7 @@ const submitChallenge = async () => {
   try {
     await axios.post('/api/challenges', payload)
     alert('챌린지가 생성되었습니다!')
-    // TODO: 목록 페이지로 이동
+    // TODO: 페이지 이동 또는 초기화 등 추가 작업
   } catch (e) {
     console.error(e)
     alert('생성 중 오류가 발생했습니다.')
@@ -268,33 +242,3 @@ const submitChallenge = async () => {
   background: #1a252f;
 }
 </style>
-
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAccountStore } from '@/stores/accounts'
-import axios from 'axios'
-
-const store = useAccountStore()
-const router = useRouter()
-const API_URL = 'http://127.0.0.1:8000/api/v1'
-
-const form = ref({
-  title: '',
-  description: '',
-  start_date: '',
-  end_date: '',
-  target_books: 1,
-})
-
-const createChallenge = () => {
-  axios.post(`${API_URL}/challenges/`, form.value, {
-    headers: {
-      Authorization: `Token ${store.token}`,
-    }
-  })
-    .then(() => {
-      router.push('/challenges')
-    })
-    .catch(err => console.error(err))
-}
-</script>
