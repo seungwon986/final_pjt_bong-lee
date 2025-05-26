@@ -15,7 +15,15 @@
           </div>
           
           <div class="dropdown">
-            <RouterLink to="/books" class="nav-link" exact-active-class="active">도서 목록</RouterLink>
+            <RouterLink
+              to="/books"
+              class="nav-link"
+              exact-active-class="router-link-exact-active"
+            >
+              도서 목록
+            </RouterLink>            
+
+
             <div class="dropdown-content">
               <ol>
                 <li><RouterLink :to="{ name: 'books', query: { category: '전체' } }">전체</RouterLink></li>
@@ -129,12 +137,6 @@ onMounted(() => {
 
 
 <style lang="scss">
-
-.main-wrapper {
-  width: 100%;
-  max-width: none;     /* ✅ 중앙제한 제거 */
-  padding: 0;          /* ✅ 좌우 여백 제거 */
-}
 :root {
   --dropdown-bg: transparent;
   --dropdown-hover-bg: rgba(0, 0, 0, 0.05);
@@ -145,7 +147,6 @@ onMounted(() => {
 body {
   font-family: 'Pretendard', sans-serif;
   font-weight: 400;
-  line-height: 1.6;
   margin: 0;
   padding: 0;
   background: #fff;
@@ -153,13 +154,11 @@ body {
   overflow-x: hidden;
 }
 
-
-
 .navbar {
   width: 100%;
   background: #fff;
-  box-shadow: none;
 }
+
 .nav-container {
   max-width: 1800px;
   margin: 0 auto;
@@ -167,35 +166,17 @@ body {
   height: 60px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #000;
   justify-content: space-between;
-}
-
-.left {
-  flex: 1;
-}
-
-.center {
-  flex: 2;
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-}
-
-.right {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
+  border-bottom: 1px solid #b4b4b48a;
 }
 
 .logo {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-family: 'AritaB', sans-serif;
+  font-size: 45px;
   color: #000;
   text-decoration: none;
 }
-/* 중앙 메뉴 */
+
 .main-nav {
   display: flex;
   gap: 2rem;
@@ -211,18 +192,30 @@ body {
       font-weight: 500;
       color: #333;
       text-decoration: none;
-      text-transform: uppercase;
       transition: all 0.3s ease;
+      text-transform: uppercase;
+      height: 60px;
+      line-height: 28px;
+      position: relative;
 
       &:hover {
         background-color: rgba(0, 0, 0, 0.04);
         color: #000;
       }
 
+      &.router-link-exact-active::after {
+        content: '';
+        position: absolute;
+        bottom: 3px; // ✔ 혜린 눈으로 확인한 위치
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--accent-color);
+      }
+
       &.router-link-exact-active {
         color: #000;
         font-weight: 600;
-        border-bottom: 2px solid var(--accent-color);
       }
     }
 
@@ -251,7 +244,6 @@ body {
           color: #444;
           text-decoration: none;
           font-size: 0.9rem;
-          transition: background 0.2s;
 
           &:hover {
             background: var(--dropdown-hover-bg);
@@ -269,15 +261,11 @@ body {
     }
   }
 }
-  .left {
-    justify-content: flex-start;
-  }
 
-/* 인증 버튼 */
 .actions {
   display: flex;
-  justify-self: flex;
   gap: 16px;
+
   a,
   button {
     font-size: 0.9rem;
@@ -285,8 +273,8 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    transition: color 0.2s ease;
     padding: 6px 10px;
+    transition: color 0.2s ease;
 
     &:hover {
       color: var(--accent-color);
@@ -294,7 +282,6 @@ body {
   }
 }
 
-/* 햄버거 메뉴 (모바일용) */
 .hamburger {
   display: none;
   font-size: 1.5rem;
@@ -303,7 +290,6 @@ body {
   cursor: pointer;
 }
 
-/* 반응형 */
 @media (max-width: 768px) {
   .hamburger {
     display: block;
@@ -321,8 +307,8 @@ body {
     top: 60px;
     left: 0;
     right: 0;
-    border-top: 1px solid #eee;
     z-index: 1000;
+    border-top: 1px solid #eee;
   }
 
   .main-nav.open .nav-link {
@@ -336,7 +322,7 @@ body {
   }
 }
 
-/* 페이드 전환 효과 */
+/* Fade transition */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.4s ease, transform 0.4s ease;
@@ -351,5 +337,4 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
-
 </style>

@@ -1,5 +1,7 @@
 <template>
   <div class="main-wrapper">
+    <div class="gradient-bg" :style="{ opacity: gradientOpacity }"></div>
+
     <!-- 🖼️ Hero Swiper Section -->
     <div class="hero-swiper section-observe">
       <Swiper
@@ -14,18 +16,26 @@
       </Swiper>
     </div>
 
+
+
+
+
+
+
     <div class="below-hero-bg">
       <div class="main-container">
-        <!-- 추천 도서 & 베스트셀러 -->
+
         <div class="row-section section-observe">
-           <Recommend v-if="store.isLogIn" /> 
-          <BestSeller :books="bestSellers" />
+          <Recommend v-if="store.isLogIn" class="half-section" />
         </div>
 
-        <!-- 진행 중인 챌린지 -->
+        <div class="row-section section-observe">
+          <BestSeller :books="bestSellers" class="full-section" />
+        </div>
+  
         <div class="row-section">
           <div class="half-section challenge-box section-observe" ref="challengeSection">
-            <h2 class="section-title">💪 진행 중인 챌린지</h2>
+            <h2 class="section-title">진행 중인 챌린지</h2>
             <div class="slider-wrapper">
               <button class="slide-btn left" @click="slideLeftChallenge">‹</button>
               <div class="slider" ref="challengeSlider">
@@ -42,13 +52,14 @@
       </div>
     </div>
   </div>
+  
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { RouterLink } from 'vue-router'
-import { useAccountStore } from '@/stores/accounts' // ✅ 추가
+import { useAccountStore } from '@/stores/accounts'
 
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
@@ -63,17 +74,15 @@ const slides = [
   { src: '/img/bn1.png', alt: '배너1' },
   { src: '/img/bn2.png', alt: '배너2' },
 ]
-
+const gradientOpacity = ref(0)
 const bestSellers = ref([])
 const challenges = ref([])
-
 const store = useAccountStore()
 
 const slideLeftChallenge = () => {
   const s = document.querySelector('.challenge-box .slider')
   if (s) s.scrollLeft -= 400
 }
-
 const slideRightChallenge = () => {
   const s = document.querySelector('.challenge-box .slider')
   if (s) s.scrollLeft += 400
@@ -96,39 +105,59 @@ onMounted(() => {
 
   document.querySelectorAll('.section-observe').forEach(el => observer.observe(el))
 })
+
+
 </script>
 
 <style scoped>
-.hero-swiper {
+.main-wrapper {
+  position: relative;
   width: 100%;
-  overflow: hidden;
-}
-.hero-image {
-  width: 100% !important;
-  height: auto !important;
-  object-fit: cover;
 }
 
-.main-wrapper { width: 100%; }
+.gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 200vh;
+  background: linear-gradient(to bottom, #c5ffe9, #ffffff);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.hero-swiper .swiper-slide img {
+  width: 100%;
+  object-fit: contain;
+  max-height: 550px;
+}
+
+/* ② 파도 구분자 */
+.wave-divider {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;           /* 불필요한 여백 제거 */
+  margin-top: -1px;         /* SVG 아래 선 겹침 방지 */
+  position: relative;
+  z-index: 2;
+}
+.wave-divider svg {
+  display: block;
+  width: 1400px;
+  height: 50px;             /* 파도 높이 조절 가능 */
+}
+
+/* ③ 아래 섹션 배경색 */
+.below-hero-bg {
+  background-color: #b5f0bf6b; /* 원하는 파스텔 톤으로 변경 */
+  position: relative;
+  z-index: 1;
+  padding: 60px 20px;       /* 위아래 여백 */
+}
 .below-hero-bg {
   position: relative;
-  background-color: #f7ffd593;
-  padding-top: 3rem;
-}
-.below-hero-bg::before,
-.below-hero-bg::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 1px;
-  background: #ddd;
-}
-.below-hero-bg::before {
-  left: calc((100% - min(100%, 1400px)) / 2);
-}
-.below-hero-bg::after {
-  right: calc((100% - min(100%, 1400px)) / 2);
+  padding-top: 0.5rem;
 }
 
 .main-container {
@@ -145,19 +174,11 @@ onMounted(() => {
   margin-top: 4rem;
   position: relative;
 }
-.row-section::after {
-  content: '';
-  display: block;
-  height: 1px;
-  background: #ddd;
-  width: 100%;
-  margin: 2rem 0 0;
-}
 
 .half-section {
   flex: 1 1 0;
   min-width: 300px;
-  background-color: #abffdf56;
+  background: transparent;
   border-radius: 16px;
   padding: 1.5rem 1rem;
   display: flex;
@@ -165,11 +186,13 @@ onMounted(() => {
   justify-content: space-between;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
+
 .section-title {
   font-size: 1.5rem;
   font-weight: 500;
   margin-bottom: 1.2rem;
 }
+
 .slider-wrapper {
   display: flex;
   align-items: center;
@@ -177,6 +200,7 @@ onMounted(() => {
   overflow: hidden;
   margin-top: 0.5rem;
 }
+
 .slider {
   display: flex;
   gap: 1rem;
@@ -184,6 +208,10 @@ onMounted(() => {
   scroll-behavior: smooth;
   padding: 0 0.5rem;
 }
+.slider::-webkit-scrollbar {
+  display: none;
+}
+
 .card {
   min-width: 160px;
   max-width: 160px;
@@ -197,6 +225,7 @@ onMounted(() => {
 .card:hover {
   transform: translateY(-6px);
 }
+
 .more-link {
   display: block;
   text-align: right;
@@ -205,6 +234,7 @@ onMounted(() => {
   font-weight: bold;
   font-size: 0.9rem;
 }
+
 .slide-btn {
   background: #fff;
   border: 1px solid #ccc;
@@ -221,8 +251,12 @@ onMounted(() => {
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-.slide-btn.left { left: 0.3rem; }
-.slide-btn.right { right: 0.3rem; }
+.slide-btn.left {
+  left: 0.3rem;
+}
+.slide-btn.right {
+  right: 0.3rem;
+}
 
 .section-observe {
   opacity: 0;

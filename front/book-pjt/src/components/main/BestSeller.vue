@@ -1,27 +1,28 @@
 <template>
-  <h2 class="section-title">베스트셀러</h2>
-  <div class="bestseller-section">
-
-    <div class="category-tabs">
-      <button
-        v-for="g in genres"
-        :key="g"
-        :class="{ active: activeGenre === g }"
-        @click="filterByCategory(g)"
-      >{{ g }}</button>
-    </div>
-
-    <div class="slider-wrapper">
-      <button class="slide-btn left" @click="slideLeft">‹</button>
-
-      <div class="book-slider" ref="slider">
-        <div class="book-card" v-for="book in filteredBooks" :key="book.id">
-          <img :src="book.cover" :alt="book.title" class="book-cover" />
-          <p class="book-title">{{ book.title }}</p>
-        </div>
+  <div class="bestseller-wrapper">
+    <h2 class="section-title">베스트셀러</h2>
+    <div class="bestseller-section">
+      <div class="category-tabs">
+        <button
+          v-for="g in genres"
+          :key="g"
+          :class="{ active: activeGenre === g }"
+          @click="filterByCategory(g)"
+        >{{ g }}</button>
       </div>
 
-      <button class="slide-btn right" @click="slideRight">›</button>
+      <div class="slider-wrapper">
+        <button class="slide-btn left" @click="slideLeft">‹</button>
+
+        <div class="book-slider" ref="slider">
+          <div class="book-card" v-for="book in filteredBooks" :key="book.id">
+            <img :src="book.cover" :alt="book.title" class="book-cover" />
+            <p class="book-title">{{ book.title }}</p>
+          </div>
+        </div>
+
+        <button class="slide-btn right" @click="slideRight">›</button>
+      </div>
     </div>
   </div>
 </template>
@@ -61,28 +62,28 @@ onMounted(() => {
 })
 </script>
 
-
-
 <style scoped>
+.bestseller-wrapper {
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
 .bestseller-section {
   width: 100%;
-  
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  background-color: #f8f9fb; /* 은은한 배경색 */
+  padding: 1rem 1rem;
+  background-color: #d8d8d89f;
   border-radius: 16px;
 }
 
 .section-title {
-  font-size: 1.8rem;
-  font-weight: 500;
+  font-size: 1.5rem;
+  font-weight: 600;
   text-align: left;
   margin-bottom: 1.2rem;
-  margin-left: 30px;
-  color: #333;
+  margin-left: 20px;
+  color: #757575;
 }
 
-/* 카테고리 탭 버튼 */
 .category-tabs {
   display: flex;
   justify-content: center;
@@ -108,7 +109,6 @@ onMounted(() => {
   font-weight: bold;
 }
 
-/* 슬라이더 구조 */
 .slider-wrapper {
   display: flex;
   align-items: center;
@@ -116,7 +116,6 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* 카드 슬라이더 내부 */
 .book-slider {
   display: flex;
   gap: 1.2rem;
@@ -125,7 +124,6 @@ onMounted(() => {
   padding: 0 5rem 3rem 5rem;
 }
 
-/* 각 책 카드 스타일 */
 .book-card {
   min-width: 150px;
   max-width: 150px;
@@ -162,7 +160,6 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 
-/* 슬라이드 버튼 */
 .slide-btn {
   background: white;
   border: 1px solid #ccc;

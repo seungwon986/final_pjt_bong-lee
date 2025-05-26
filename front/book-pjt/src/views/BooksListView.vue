@@ -1,8 +1,10 @@
 <template>
   <div class="book-list-container">
     <section class="recommendations">
-      <h1 class="banner-title">BOOK</h1>
-      <h2 class="banner-subtitle">CATALOG</h2>
+      <div class="banner-images">
+        <img src="/img/bookcat.png" alt="Banner 1" class="banner-image" />
+      
+      </div>
     </section>
     <p class="subtitle">마음에 드는 책을 북마크 해보세요!</p>
 
@@ -23,6 +25,13 @@
 
     <div class="book-grid">
       <div class="book-card" v-for="book in paginatedBooks" :key="book.id">
+
+  <div class="card-wave-top">
+    <svg viewBox="0 0 1440 40" preserveAspectRatio="none">
+      <path d="M0,30 C360,10 1080,50 1440,30 L1440,0 L0,0 Z" fill="#fff" />
+    </svg>
+  </div>
+        
         <div class="book-card-inner">
           <img :src="book.cover" :alt="book.title" class="book-cover" />
           <div class="book-info">
@@ -158,7 +167,27 @@ async function toggleBookmark(bookId) {
 
 
 <style scoped>
+.book-card {
+  border: 1px solid #ccc;
+  border-top: none; /* 상단은 물결로 대체 */
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: white;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
 
+.card-wave-top {
+  height: 40px;
+  width: 100%;
+  line-height: 0;
+}
+
+.card-wave-top svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 .book-title.clamp {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -172,9 +201,10 @@ async function toggleBookmark(bookId) {
   overflow: visible;
 }
 .recommendations {
-  text-align: left;
-  padding: 3rem 1rem 3rem;
-  background-color: none;
+  display: flex;
+  align-items: center;
+  height: 50vh;
+  padding: 3rem 1rem;
 }
 .banner-title {
   font-size: 6rem;
@@ -183,10 +213,22 @@ async function toggleBookmark(bookId) {
   letter-spacing: -0.05em;
   margin-bottom: 0;
 }
+.banner-images {
+  display: flex;
+justify-content: center; /* 양쪽 균등 간격을 원하면 space-between */
+  align-items: center;
+  gap: 0rem;
+  padding: 3rem 1rem;
+}
+.banner-image {
+  max-width: 60%;
+  display: block;
+}
+
 .banner-subtitle {
   font-size: 3rem;
   font-weight: 300;
-  text-align: left;
+  text-align: center;
   margin-top: -0.5rem;
   padding-left: 10px;
   color: #333;
@@ -196,14 +238,9 @@ async function toggleBookmark(bookId) {
   margin: 0 auto;    /* 중앙 정렬 */
   padding: 0 1rem;
   background: #fff;
-  font-family: 'Pretendard Variable', sans-serif;
+  font-family: 'AritaM', sans-serif;
 }
-.title {
-  font-size: 2rem;
-  text-align: center;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
+
 .title-wrap {
   position: relative;
   padding-right: 36px; /* 하트 공간 확보 */
@@ -211,7 +248,7 @@ async function toggleBookmark(bookId) {
 }
 .subtitle {
   padding-left: 30px;
-  text-align: left;
+  text-align: center;
   color: #888;
   margin-bottom: 2rem;
 }
@@ -223,7 +260,6 @@ async function toggleBookmark(bookId) {
   margin-bottom: 2rem;
   padding-top: 50px;
   padding-bottom: 20px;
-
 }
 .category-tab {
   border: 1px solid #303331;
@@ -240,6 +276,8 @@ async function toggleBookmark(bookId) {
   background: #4ef748;
   color: #fff;
 }
+
+/* 책 리스트 */
 .book-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 한 줄에 2개 고정 */
@@ -251,13 +289,16 @@ async function toggleBookmark(bookId) {
   border-bottom: 1px solid #303030;
   padding: 2rem;
   background-color: #fff;
-  transition: transform 0.2s ease;
+  transition: box-shadow 0.2s ease; /* ✅ 여기만 transition */
   border-radius: 0;
 }
 .book-card-inner {
   display: flex;
   flex-direction: row;
   gap: 1.5rem;
+  align-items: flex-start;
+    border-radius: 1rem;
+
 }
 .book-card:hover {
    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
@@ -283,10 +324,9 @@ svg.icon {
 }
 .heart-path {
   fill: transparent;
-  stroke: #ff99c8;
-  stroke-width: 60px;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
+  stroke: #ff99c98c;
+  stroke-width: 70px;
+ 
   stroke-linecap: round;
 }
 .burst {
@@ -356,8 +396,7 @@ cursor: pointer;
   position: relative;
 }
 .book-title {
-cursor: pointer;
-
+  cursor: pointer;
   font-size: 1.1rem;
   font-weight: bold;
   line-height: 1.4;

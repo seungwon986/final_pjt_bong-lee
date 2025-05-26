@@ -1,24 +1,27 @@
 <template>
-  <h2 class="section-title">나의 선호도 기반 추천 도서</h2>
-  <div class="recommend-section">
-    <div v-if="books.length">
-      <div class="slider-wrapper">
-        <button class="slide-btn left" @click="slideLeft">‹</button>
-
-        <div class="book-slider" ref="slider">
-          <div class="book-card" v-for="book in books" :key="book.id">
-            <img :src="book.cover" :alt="book.title" class="book-cover" />
-            <p class="book-title">{{ book.title }}</p>
+  <div>
+    <h2 class="section-title">나의 선호도 기반 추천 도서</h2>
+    <div class="recommend-section">
+      <div v-if="books.length">
+        <div class="slider-wrapper">
+          <button class="slide-btn left" @click="slideLeft">‹</button>
+  
+          <div class="book-slider" ref="slider">
+            <div class="book-card" v-for="book in books" :key="book.id">
+              <img :src="book.cover" :alt="book.title" class="book-cover" />
+              <p class="book-title">{{ book.title }}</p>
+            </div>
           </div>
+  
+          <button class="slide-btn right" @click="slideRight">›</button>
         </div>
-
-        <button class="slide-btn right" @click="slideRight">›</button>
+      </div>
+  
+      <div v-else class="empty-message">
+        📌 최근 관심 도서를 기반으로 추천 결과를 가져오는 중입니다.
       </div>
     </div>
 
-    <div v-else class="empty-message">
-      📌 최근 관심 도서를 기반으로 추천 결과를 가져오는 중입니다.
-    </div>
   </div>
 </template>
 
@@ -67,10 +70,9 @@ watch(
   width: 100%;
   margin: 0 auto;
   padding: 2rem 1rem;
-  background-color: #f8f9fb;
+  background-color: #fae4c780;
   border-radius: 16px;
 }
-
 .section-title {
   font-size: 1.8rem;
   font-weight: 500;
