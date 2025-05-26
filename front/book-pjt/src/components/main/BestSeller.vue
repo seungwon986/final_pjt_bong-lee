@@ -1,6 +1,7 @@
 <template>
   <div class="bestseller-wrapper">
     <h2 class="section-title">베스트셀러</h2>
+    <p class="sub">카테고리별 베스트 셀러를 확인해보세요 ! </p>
     <div class="bestseller-section">
       <div class="category-tabs">
         <button
@@ -63,6 +64,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.sub {
+  padding-left: 20px;
+}
 .bestseller-wrapper {
   width: 100%;
   padding: 2rem 1rem;

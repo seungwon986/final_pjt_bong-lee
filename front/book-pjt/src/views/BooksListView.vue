@@ -3,7 +3,6 @@
     <section class="recommendations">
       <div class="banner-images">
         <img src="/img/bookcat.png" alt="Banner 1" class="banner-image" />
-      
       </div>
     </section>
     <p class="subtitle">마음에 드는 책을 북마크 해보세요!</p>
@@ -25,20 +24,29 @@
 
     <div class="book-grid">
       <div class="book-card" v-for="book in paginatedBooks" :key="book.id">
+        <div class="card-wave-top">
+          <svg viewBox="0 0 1440 40" preserveAspectRatio="none">
+            <path d="M0,30 C360,10 1080,50 1440,30 L1440,0 L0,0 Z" fill="#fff" />
+          </svg>
+        </div>
 
-  <div class="card-wave-top">
-    <svg viewBox="0 0 1440 40" preserveAspectRatio="none">
-      <path d="M0,30 C360,10 1080,50 1440,30 L1440,0 L0,0 Z" fill="#fff" />
-    </svg>
-  </div>
-        
-        <div class="book-card-inner">
+        <!-- ✅ RouterLink로 전체 카드 내용 감싸기 (스타일 유지) -->
+        <RouterLink
+          :to="{ name: 'BookDetail', params: { id: book.id } }"
+          class="book-card-inner"
+          style="text-decoration: none; color: inherit;"
+        >
           <img :src="book.cover" :alt="book.title" class="book-cover" />
           <div class="book-info">
             <div class="title-wrap">
               <h3 class="book-title clamp">{{ book.title }}</h3>
-              <label class="heart-label">
-                <input type="checkbox" :checked="isLiked(book.id)" @change="toggleBookmark(book.id)" class="heart-checkbox">
+              <label class="heart-label" @click.stop>
+                <input
+                  type="checkbox"
+                  :checked="isLiked(book.id)"
+                  @change="toggleBookmark(book.id)"
+                  class="heart-checkbox"
+                />
                 <svg class="icon" viewBox="0 0 1024 1024">
                   <path class="heart-path"
                     d="M742.4 101.12A249.6 249.6 0 0 0 512 256a249.6
@@ -55,7 +63,7 @@
             <p class="book-date">출판일 | {{ formattedDate(book.pub_date) }}</p>
             <p class="book-description">{{ book.description }}</p>
           </div>
-        </div>
+        </RouterLink>
       </div>
     </div>
 
@@ -67,6 +75,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'

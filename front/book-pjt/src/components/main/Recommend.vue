@@ -1,13 +1,19 @@
 <template>
   <div>
-    <h2 class="section-title">나의 선호도 기반 추천 도서</h2>
+    <h3 class="section-title">나의 선호도 기반 추천 도서</h3>
+    <p class="sub">내가 선호하는 책과 비슷한 책을 추천 받아보세요 !</p>
     <div class="recommend-section">
       <div v-if="books.length">
         <div class="slider-wrapper">
           <button class="slide-btn left" @click="slideLeft">‹</button>
   
           <div class="book-slider" ref="slider">
-            <div class="book-card" v-for="book in books" :key="book.id">
+            <div
+  class="book-card"
+  v-for="book in books"
+  :key="book.id"
+  @click="goToDetail(book.id)"
+>
               <img :src="book.cover" :alt="book.title" class="book-cover" />
               <p class="book-title">{{ book.title }}</p>
             </div>
@@ -29,11 +35,17 @@
 import { ref, watch } from 'vue'
 import axios from 'axios'
 import { useAccountStore } from '@/stores/accounts.js'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const books = ref([])
 const store = useAccountStore()
 const slider = ref(null)
 
+// 상세페이지 이동 함수 
+const goToDetail = (bookId) => {
+  router.push(`/books/${bookId}`)
+}
 const fetchRecommend = async () => {
   if (!store.user?.preferred_books?.length) return
 
@@ -66,6 +78,9 @@ watch(
 </script>
 
 <style scoped>
+.sub {
+  padding-left: 20px;
+}
 .recommend-section {
   width: 100%;
   margin: 0 auto;
@@ -74,12 +89,12 @@ watch(
   border-radius: 16px;
 }
 .section-title {
-  font-size: 1.8rem;
-  font-weight: 500;
+  font-size: 1.5rem;
+  font-weight: 600;
   text-align: left;
   margin-bottom: 1.2rem;
-  margin-left: 30px;
-  color: #333;
+  margin-left: 20px;
+  color: #4e4e4e;
 }
 
 .slider-wrapper {
@@ -98,6 +113,7 @@ watch(
 }
 
 .book-card {
+  cursor: pointer;
   min-width: 150px;
   max-width: 150px;
   background: #fff;

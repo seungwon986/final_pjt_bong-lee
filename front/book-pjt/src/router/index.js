@@ -33,7 +33,13 @@ const routes = [
   name: 'ChallengeCreate',
   component: ChallengeCreateView,
   meta: { requiresAuth: true },
-}
+},
+{
+  path: '/books/:id',
+  name: 'BookDetail',
+  component: () => import('@/views/BookDetailView.vue'),
+  props: true
+},
 
 ]
 

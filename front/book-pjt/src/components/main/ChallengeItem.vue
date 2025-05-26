@@ -1,75 +1,111 @@
 <template>
-  <div class="challenge-card">
-
-    <!-- ai로 이미지 생성하는 거.. -->
-    <!-- <img :src="challenge.image_url || defaultImage" class="challenge-image" /> -->
-    <h3>{{ challenge.title }}</h3>
-    <p>{{ challenge.description }}</p>
-    <p class="date">📅 {{ challenge.start_date }} ~ {{ challenge.end_date }}</p>
-
-    <!-- 퍼센트 표시 -->
-    <div class="progress-bar">
-      <div class="progress" :style="{ width: progress + '%' }"></div>
+  <div class="challenge-item" :style="{ backgroundColor: backgroundColor }">
+    <!-- 책 표지 -->
+    <div class="cover-wrapper">
+      <img :src="challenge.book.cover_image" :alt="challenge.book.title" />
     </div>
-    <p class="progress-label">{{ progress }}%</p>
+
+    <!-- 제목, 저자 -->
+    <div class="content">
+      <h3>{{ challenge.book.title }}</h3>
+      <p>{{ challenge.book.author }}</p>
+    </div>
+
+    <!-- 기간 -->
+    <p class="period">{{ formattedPeriod }}</p>
+
+    <!-- 참여자 및 버튼 -->
+    <div class="footer">
+      <span>👥 {{ challenge.current_participants }} / {{ challenge.max_participants }}</span>
+      <button @click="$emit('join', challenge.id)">→</button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 
-const props = defineProps({ challenge: Object })
-const defaultImage = '/img/default-challenge.jpg'
+const props = defineProps({
+  challenge: Object
+})
 
-const progress = computed(() => {
-  const now = new Date()
-  const start = new Date(props.challenge.start_date)
-  const end = new Date(props.challenge.end_date)
+// 카테고리 색상 매핑
+const categoryColorMap = {
+  '소설': '#ffe0cc',
+  '자기계발': '#e0d4ff',
+  '여행': '#ccf0ff',
+  '기본': '#f5f5f5'
+}
 
-  if (now < start) return 0
-  if (now > end) return 100
+// 배경색 선택
+const backgroundColor = computed(() => {
+  return categoryColorMap[props.challenge.book.category?.name] || categoryColorMap['기본']
+})
 
-  const total = end - start
-  const elapsed = now - start
-  return Math.floor((elapsed / total) * 100)
+// 기간 포맷팅
+const formattedPeriod = computed(() => {
+  const start = props.challenge.start_date?.slice(0, 10)
+  const end = props.challenge.end_date?.slice(0, 10)
+  return start && end ? `${start} ~ ${end}` : ''
 })
 </script>
 
 <style scoped>
-.challenge-card {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-  text-align: center;
-}
-.challenge-image {
-  width: 100%;
-  max-height: 160px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
-}
-.progress-bar {
-  height: 8px;
-  width: 100%;
-  background: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 0.5rem;
-}
-.progress {
+.challenge-item {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   height: 100%;
-  background-color: #2cd99c;
+  transition: transform 0.2s;
 }
-.progress-label {
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
+.challenge-item:hover {
+  transform: translateY(-5px);
+}
+
+.cover-wrapper img {
+  width: 100%;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  height: 140px;
+  margin-bottom: 1rem;
+}
+
+.content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+}
+.content p {
+  margin: 0;
+  font-size: 0.9rem;
   color: #666;
 }
-.date {
-  color: #888;
-  font-size: 0.875rem;
+
+.period {
+  font-size: 0.8rem;
+  color: #999;
+  margin: 0.5rem 0;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer button {
+  background: #fff;
+  color: #555;
+  border: 1px solid #ccc;
+  transition: all 0.2s ease;
+}
+.footer button:hover {
+  background: #2cd99c;
+  color: white;
+  border-color: transparent;
 }
 </style>

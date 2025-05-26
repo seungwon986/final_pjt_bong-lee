@@ -156,6 +156,17 @@ const submitChallenge = async () => {
     alert('생성 중 오류가 발생했습니다.')
   }
 }
+
+
+
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
+const bookId = route.query.book_id
+const prefillTitle = route.query.title
+const prefillAuthor = route.query.author
+
+
 </script>
 
 <style scoped>

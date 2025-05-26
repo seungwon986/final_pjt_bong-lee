@@ -34,21 +34,37 @@
         </div>
   
         <div class="row-section">
-          <div class="half-section challenge-box section-observe" ref="challengeSection">
-            <h2 class="section-title">진행 중인 챌린지</h2>
-            <div class="slider-wrapper">
-              <button class="slide-btn left" @click="slideLeftChallenge">‹</button>
-              <div class="slider" ref="challengeSlider">
-                <div class="card" v-for="c in challenges" :key="c.id">
-                  <h4 class="title">{{ c.title }}</h4>
-                  <p class="intro">{{ c.intro }}</p>
-                </div>
-              </div>
-              <button class="slide-btn right" @click="slideRightChallenge">›</button>
-            </div>
-            <RouterLink to="/challenge/list" class="more-link">→ 더 보기</RouterLink>
-          </div>
-        </div>
+  <div class="half-section challenge-box section-observe" ref="challengeSection">
+    <h2 class="section-title">진행 중인 챌린지</h2>
+    <p class="sub">카테고리별로 진행 중인 챌린지를 살펴보세요</p>
+
+    <!-- ✅ 카테고리 탭 -->
+    <div class="category-tabs">
+      <button
+        v-for="cat in categoryList"
+        :key="cat"
+        :class="{ active: cat === activeCategory }"
+        @click="activeCategory = cat"
+      >{{ cat }}</button>
+    </div>
+
+    <!-- ✅ 필터된 챌린지 슬라이드 -->
+    <div class="slider-wrapper">
+      <button class="slide-btn left" @click="slideLeftChallenge">‹</button>
+      <div class="slider" ref="challengeSlider">
+        <ChallengeItem
+          v-for="c in filteredChallenges"
+          :key="c.id"
+          :challenge="c"
+        />
+      </div>
+      <button class="slide-btn right" @click="slideRightChallenge">›</button>
+    </div>
+
+    <RouterLink to="/challenge/list" class="more-link">→ 더 보기</RouterLink>
+  </div>
+</div>
+
       </div>
     </div>
   </div>
@@ -56,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import axios from 'axios'
 import { RouterLink } from 'vue-router'
 import { useAccountStore } from '@/stores/accounts'
@@ -106,7 +122,19 @@ onMounted(() => {
   document.querySelectorAll('.section-observe').forEach(el => observer.observe(el))
 })
 
+import ChallengeItem from '@/components/main/ChallengeItem.vue'
 
+const activeCategory = ref('전체')
+
+const categoryList = computed(() => {
+  const set = new Set(challenges.value.map(c => c.book?.category?.name).filter(Boolean))
+  return ['전체', ...set]
+})
+
+const filteredChallenges = computed(() => {
+  if (activeCategory.value === '전체') return challenges.value
+  return challenges.value.filter(c => c.book?.category?.name === activeCategory.value)
+})
 </script>
 
 <style scoped>
@@ -114,7 +142,9 @@ onMounted(() => {
   position: relative;
   width: 100%;
 }
-
+.sub {
+  padding-left: 10px;
+}
 .gradient-bg {
   position: fixed;
   top: 0;
@@ -173,12 +203,15 @@ onMounted(() => {
   flex-wrap: wrap;
   margin-top: 4rem;
   position: relative;
+    background: #ffffffd8;
+      border-radius: 16px;
+
 }
 
 .half-section {
   flex: 1 1 0;
   min-width: 300px;
-  background: transparent;
+  background: #ffffff9f;
   border-radius: 16px;
   padding: 1.5rem 1rem;
   display: flex;
@@ -191,6 +224,7 @@ onMounted(() => {
   font-size: 1.5rem;
   font-weight: 500;
   margin-bottom: 1.2rem;
+  padding-left: 10px;
 }
 
 .slider-wrapper {
@@ -266,5 +300,28 @@ onMounted(() => {
 .section-observe.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+.category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.category-tabs button {
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 2rem;
+  background: #eaf8f0;
+  color: #333;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.category-tabs button.active {
+  background: #2cd99c;
+  color: #fff;
+  font-weight: bold;
 }
 </style>
