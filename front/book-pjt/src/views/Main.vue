@@ -18,7 +18,7 @@
       <div class="main-container">
         <!-- 추천 도서 & 베스트셀러 -->
         <div class="row-section section-observe">
-          <Recommend />
+           <Recommend v-if="store.isLogIn" /> 
           <BestSeller :books="bestSellers" />
         </div>
 
@@ -48,6 +48,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { RouterLink } from 'vue-router'
+import { useAccountStore } from '@/stores/accounts' // ✅ 추가
 
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
@@ -66,6 +67,8 @@ const slides = [
 const bestSellers = ref([])
 const challenges = ref([])
 
+const store = useAccountStore()
+
 const slideLeftChallenge = () => {
   const s = document.querySelector('.challenge-box .slider')
   if (s) s.scrollLeft -= 400
@@ -77,7 +80,7 @@ const slideRightChallenge = () => {
 }
 
 onMounted(() => {
-  axios.get('http://127.0.0.1:8000/api/v1/books/bestsellers/')
+  axios.post('http://127.0.0.1:8000/api/v1/books/import/')
     .then(res => bestSellers.value = res.data)
     .catch(err => console.error('베스트셀러 로드 실패:', err))
 

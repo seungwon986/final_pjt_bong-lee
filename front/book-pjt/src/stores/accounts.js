@@ -13,59 +13,63 @@ export const useAccountStore = defineStore(
 
     const isLogIn = computed(() => !!token.value);
 
-    const signUp = (payload) => {
+    const signUp = async (payload) => {
       const isFormData = payload instanceof FormData;
-      return axios({
-        method: "POST",
-        url: `${ACCOUNT_API}/signup/`,
-        data: payload,
-        headers: isFormData ? {} : { "Content-Type": "application/json" },
-      })
-        .then(() => router.push("/"))
-        .catch((err) => {
-          console.error("회원가입 실패:", err.response?.data || err.message);
-          throw err;
+      try {
+        await axios({
+          method: "POST",
+          url: `${ACCOUNT_API}/signup/`,
+          data: payload,
+          headers: isFormData ? {} : { "Content-Type": "application/json" },
         });
+      } catch (err) {
+        console.error("회원가입 실패:", err.response?.data || err.message);
+        throw err;
+      }
     };
 
-    const logIn = (credentials) =>
-      axios
-        .post(`${ACCOUNT_API}/login/`, credentials)
-        .then((res) => {
-          token.value = res.data.key;
-          router.push("/");
-        })
-        .catch((err) =>
-          console.error("로그인 실패:", err.response?.data || err.message)
-        );
+    const logIn = async (credentials) => {
+      try {
+        const res = await axios.post(`${ACCOUNT_API}/login/`, credentials);
+        token.value = res.data.key;
 
-    const logOut = () =>
-      axios
-        .post(`${ACCOUNT_API}/logout/`, null, {
-          headers: { Authorization: `Token ${token.value}` },
-        })
-        .then(() => {
-          token.value = "";
-          router.push("/login");
-        })
-        .catch((err) =>
-          console.error("로그아웃 실패:", err.response?.data || err.message)
-        );
+        // ✅ 사용자 정보 요청
+        await fetchUserProfile();
 
-    const fetchUserProfile = () => {
-      return axios
-        .get(`${ACCOUNT_API}/profile/`, {
+        // ✅ 메인 페이지로 이동
+        router.push("/");
+      } catch (err) {
+        console.error("로그인 실패:", err.response?.data || err.message);
+        throw err;
+      }
+    };
+
+    const logOut = async () => {
+      try {
+        await axios.post(`${ACCOUNT_API}/logout/`, null, {
           headers: { Authorization: `Token ${token.value}` },
-        })
-        .then((res) => {
-          user.value = res.data;
-        })
-        .catch((err) => {
-          console.error(
-            "사용자 정보 불러오기 실패:",
-            err.response?.data || err.message
-          );
         });
+        token.value = "";
+        user.value = null;
+        router.push("/login");
+      } catch (err) {
+        console.error("로그아웃 실패:", err.response?.data || err.message);
+      }
+    };
+
+    const fetchUserProfile = async () => {
+      if (!token.value) return;
+      try {
+        const res = await axios.get(`${ACCOUNT_API}/profile/`, {
+          headers: { Authorization: `Token ${token.value}` },
+        });
+        user.value = res.data;
+      } catch (err) {
+        console.error(
+          "사용자 정보 불러오기 실패:",
+          err.response?.data || err.message
+        );
+      }
     };
 
     return {
@@ -75,7 +79,7 @@ export const useAccountStore = defineStore(
       token,
       isLogIn,
       fetchUserProfile,
-      user
+      user,
     };
   },
   { persist: true }

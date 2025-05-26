@@ -61,7 +61,12 @@ def recommend_books(request):
     for book_id in preferred_ids:
         book = book_map.get(book_id)
         if book and book.vector:
-            vectors.append(book.vector)
+            try:
+                vec = np.array(book.vector if isinstance(book.vector, list) else json.loads(book.vector))
+                vectors.append(vec)
+            except Exception as e:
+                print(f"[ERROR] 벡터 파싱 실패 (book_id={book_id}): {e}")
+
     if not vectors:
         return Response({'error': '유효한 벡터를 가진 preferred_books 없음'}, status=400)
 
@@ -73,8 +78,12 @@ def recommend_books(request):
         if book.id in preferred_ids:
             continue
         if book.vector:
-            sim = cosine_similarity([mean_vector[0]], [book.vector])[0][0]
-            similarity_list.append((sim, book))
+            try:
+                vector = np.array(book.vector if isinstance(book.vector, list) else json.loads(book.vector))
+                sim = cosine_similarity(mean_vector, [vector])[0][0]
+                similarity_list.append((sim, book))
+            except Exception as e:
+                print(f"[ERROR] 유사도 계산 실패 (book.id={book.id}): {e}")
 
     # 유사도 상위 10개 도서 추천
     similarity_list.sort(reverse=True, key=lambda x: x[0])

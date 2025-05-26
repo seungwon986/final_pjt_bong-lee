@@ -1,6 +1,7 @@
 <template>
   <div>
     <h3>입력 정보를 확인하고 회원가입을 완료하세요</h3>
+
     <ul class="list-group my-4">
       <li class="list-group-item"><strong>아이디:</strong> {{ form.username }}</li>
       <li class="list-group-item"><strong>닉네임:</strong> {{ form.nickname }}</li>
@@ -13,7 +14,13 @@
 
     <div class="mt-4 d-flex justify-content-between">
       <button class="btn btn-secondary" @click="$emit('prev')">이전</button>
-      <button class="btn btn-success" @click="$emit('submit')">회원가입 완료</button>
+      <button
+        class="btn btn-success"
+        :disabled="isSubmitting"
+        @click="$emit('submit')"
+      >
+        {{ isSubmitting ? '가입 중...' : '회원가입 완료' }}
+      </button>
     </div>
   </div>
 </template>
@@ -27,21 +34,31 @@ const emit = defineEmits(['submit', 'prev'])
 
 const categoryNames = ref([])
 const bookTitles = ref([])
+const isSubmitting = ref(false)
 
-onMounted(() => {
-  axios.get('http://127.0.0.1:8000/api/v1/books/categories/')
-    .then(res => {
-      const map = {}
-      res.data.forEach(cat => map[cat.id] = cat.name)
-      categoryNames.value = props.form.preferred_categories.map(id => map[id]).filter(Boolean)
-    })
+// expose 상태를 상위 컴포넌트에서 제어할 수 있게 함
+defineExpose({ isSubmitting })
 
-  axios.get('http://127.0.0.1:8000/api/v1/books/')
-    .then(res => {
-      const map = {}
-      res.data.forEach(book => map[book.id] = book.title)
-      bookTitles.value = props.form.preferred_books.map(id => map[id]).filter(Boolean)
-    })
+onMounted(async () => {
+  try {
+    const [categoryRes, bookRes] = await Promise.all([
+      axios.get('http://127.0.0.1:8000/api/v1/books/categories/'),
+      axios.get('http://127.0.0.1:8000/api/v1/books/')
+    ])
+
+    const categoryMap = Object.fromEntries(categoryRes.data.map(c => [c.id, c.name]))
+    categoryNames.value = props.form.preferred_categories
+      .map(id => categoryMap[id])
+      .filter(Boolean)
+
+    const bookMap = Object.fromEntries(bookRes.data.map(b => [b.id, b.title]))
+    bookTitles.value = props.form.preferred_books
+      .map(id => bookMap[id])
+      .filter(Boolean)
+
+  } catch (error) {
+    console.error('요약 정보 불러오기 실패:', error)
+  }
 })
 </script>
 

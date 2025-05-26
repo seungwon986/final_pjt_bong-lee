@@ -88,21 +88,32 @@
 </template>
 
 <script setup>
-import { RouterLink, RouterView } from 'vue-router';
-import { useAccountStore } from '@/stores/accounts.js';
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import ScrollReveal from 'scrollreveal';
+import { RouterLink, RouterView } from 'vue-router'
+import { useAccountStore } from '@/stores/accounts.js'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import ScrollReveal from 'scrollreveal'
 
-const store = useAccountStore();
-const showMenu = ref(false);
-const logOut = () => store.logOut();
-const toggleMenu = () => (showMenu.value = !showMenu.value);
+const store = useAccountStore()
+const showMenu = ref(false)
+const logOut = () => store.logOut()
+const toggleMenu = () => (showMenu.value = !showMenu.value)
 
 onMounted(() => {
-  axios.post('http://127.0.0.1:8000/api/v1/books/import/')
+  // ✅ 로그인 상태 유지 시 사용자 정보 불러오기
+  if (store.token && !store.user) {
+    store.fetchUserProfile()
+  }
+
+  axios
+    .post('http://127.0.0.1:8000/api/v1/books/import/')
     .then(res => console.log(res.data.message || '책 불러오기 완료'))
-    .catch(err => console.error('책 불러오기 실패:', err));
+    .catch(err => console.error('책 불러오기 실패:', err))
+
+  axios
+    .post("http://127.0.0.1:8000/api/v1/books/generate-vectors/")
+    .then(() => console.log("✅ 벡터 생성 완료"))
+    .catch((err) => console.error("❌ 벡터 생성 실패", err))
 
   ScrollReveal().reveal('[v-scroll-reveal]', {
     distance: '20px',
@@ -112,8 +123,8 @@ onMounted(() => {
     opacity: 0,
     easing: 'ease-out',
     reset: false,
-  });
-});
+  })
+})
 </script>
 
 

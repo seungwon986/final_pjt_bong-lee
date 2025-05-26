@@ -28,42 +28,6 @@
               <h4>📚 내 책장</h4>
               <RouterLink to="/books" class="bookmark-more-btn">➕ 더 많은 책 북마크 하기</RouterLink>
             </div>
-            <div class="book-grid horizontal-scroll">
-              <BookCard
-                v-for="book in mergedBooks"
-                :key="book.id"
-                :book="book"
-                :is-preferred="user.preferred_books.includes(book.id)"
-                @toggle-preferred="togglePreferred"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- 내가 쓴 글 (향후 확장) -->
-        <div class="card info-card">
-          <div class="card-inner">
-            <h4>📝 내가 쓴 글</h4>
-            <p class="muted">게시글 카드 또는 리스트로 추가 예정</p>
-          </div>
-        </div>
-
-        <!-- 참여한 챌린지 -->
-        <div class="card challenge-card">
-          <div class="card-inner">
-            <h4>💪 참여한 챌린지</h4>
-            <ul class="list">
-              <li v-for="challenge in joinedChallenges" :key="challenge.id">
-                {{ challenge.title }} ({{ challenge.participants.length }}명 참여)
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 선호 도서 -->
-        <div class="card">
-          <div class="card-inner">
-            <h4>💖 선호 도서</h4>
             <div class="book-grid">
               <div class="book-card" v-for="book in preferredBooks" :key="book.id">
                 <img :src="book.cover || '/default-book-cover.png'" :alt="book.title" class="book-cover" />
@@ -90,6 +54,27 @@
             </div>
           </div>
         </div>
+
+        <!-- 내가 쓴 글 (향후 확장) -->
+        <div class="card info-card">
+          <div class="card-inner">
+            <h4>📝 내가 쓴 글</h4>
+            <p class="muted">게시글 카드 또는 리스트로 추가 예정</p>
+          </div>
+        </div>
+
+        <!-- 참여한 챌린지 -->
+        <div class="card challenge-card">
+          <div class="card-inner">
+            <h4>💪 참여한 챌린지</h4>
+            <ul class="list">
+              <li v-for="challenge in joinedChallenges" :key="challenge.id">
+                {{ challenge.title }} ({{ challenge.participants.length }}명 참여)
+              </li>
+            </ul>
+          </div>
+        </div>
+
       </section>
     </div>
   </div>
@@ -99,7 +84,6 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useAccountStore } from '@/stores/accounts.js'
-import BookCard from '@/components/BookCard.vue'
 import defaultAvatar from '@/assets/basic.jpg'
 import { RouterLink } from 'vue-router'
 

@@ -1,28 +1,28 @@
 <template>
   <div class="panel shadow1">
-    <form @submit.prevent="submitForm">
-      <!-- 진행 단계 바 -->
-      <div class="progress-bar animate4">
-        <div
-          v-for="(step, index) in steps"
-          :key="index"
-          class="progress-dot"
-          :class="{ active: index <= currentStep }"
-        ></div>
-      </div>
-      <h1 class="animate1">회원가입</h1>
+    <!-- 진행 단계 바 -->
+    <div class="progress-bar animate4">
+      <div
+        v-for="(step, index) in steps"
+        :key="index"
+        class="progress-dot"
+        :class="{ active: index <= currentStep }"
+      ></div>
+    </div>
 
-      <!-- 회원가입 단계별 컴포넌트 렌더링 -->
-      <div class="animate2 step-panel">
-        <component
-          :is="steps[currentStep]"
-          :form="form"
-          @next="nextStep"
-          @prev="prevStep"
-          @submit="submitForm"
-        />
-      </div>
-    </form>
+    <h1 class="animate1">회원가입</h1>
+
+    <!-- 단계별 입력 화면 -->
+    <div class="animate2 step-panel">
+      <component
+        :is="steps[currentStep]"
+        :ref="currentStep === steps.length - 1 ? 'stepComponent' : null"
+        :form="form"
+        @next="nextStep"
+        @prev="prevStep"
+        @submit="submitForm"
+      />
+    </div>
   </div>
 </template>
 
@@ -51,49 +51,53 @@ const form = ref({
 
 const steps = [SignUpStep1, SignUpStep2, SignUpStep3, SignUpStep4]
 const currentStep = ref(0)
+const stepComponent = ref(null)
+
 const store = useAccountStore()
 const router = useRouter()
 
 const submitForm = async () => {
-  const {
-    username, password1, password2, nickname, first_name, last_name,
-    gender, birth, preferred_categories, preferred_books, profile_image
-  } = form.value
+  // Step4의 컴포넌트에서 expose한 isSubmitting 접근
+  if (stepComponent.value?.isSubmitting) return
+  stepComponent.value.isSubmitting = true
 
-  if (!username || !password1 || !password2 || !nickname || !first_name || !last_name || !gender || !birth || !preferred_categories.length || !preferred_books.length) {
-    alert('모든 항목을 올바르게 입력했는지 확인해주세요.')
-    return
-  }
+  const f = form.value
 
   const data = new FormData()
-  data.append('username', username)
-  data.append('password1', password1)
-  data.append('password2', password2)
-  data.append('nickname', nickname)
-  data.append('first_name', first_name)
-  data.append('last_name', last_name)
-  data.append('gender', gender)
-  data.append('birth', birth)
-  preferred_categories.forEach(cat => data.append('preferred_categories', cat))
-  preferred_books.forEach(book => data.append('preferred_books', book))
-  if (profile_image) {
-    data.append('profile_image', profile_image)
+  data.append('username', f.username)
+  data.append('password1', f.password1)
+  data.append('password2', f.password2)
+  data.append('nickname', f.nickname)
+  data.append('first_name', f.first_name)
+  data.append('last_name', f.last_name)
+  data.append('gender', f.gender)
+  data.append('birth', f.birth)
+  if (f.profile_image) {
+    data.append('profile_image', f.profile_image)
   }
+  f.preferred_categories.forEach(cat => data.append('preferred_categories', cat))
+  f.preferred_books.forEach(book => data.append('preferred_books', book))
 
   try {
     await store.signUp(data)
-    await store.logIn({ username, password: password1 })
+    await store.logIn({ username: f.username, password: f.password1 })
     alert('회원가입 및 로그인 완료!')
     router.push('/')
   } catch (err) {
-    alert('회원가입 실패! 다시 시도해 주세요.')
+    const msg =
+      err?.response?.data?.nickname?.[0] ||
+      err?.response?.data?.non_field_errors?.[0] ||
+      err?.response?.data?.error ||
+      "회원가입 중 오류가 발생했습니다."
+    alert(msg)
+  } finally {
+    stepComponent.value.isSubmitting = false
   }
 }
 
 const nextStep = () => {
   if (currentStep.value < steps.length - 1) currentStep.value++
 }
-
 const prevStep = () => {
   if (currentStep.value > 0) currentStep.value--
 }
@@ -102,7 +106,6 @@ const prevStep = () => {
 <style scoped>
 .panel {
   width: 580px;
-  height: 500px inherit;
   margin: 60px auto;
   background: #ffffff;
   border-radius: 20px;
@@ -110,14 +113,6 @@ const prevStep = () => {
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  height: auto;
-  overflow: visible;
 }
 
 .shadow1 {
@@ -149,8 +144,14 @@ h1.animate1 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .progress-bar {
