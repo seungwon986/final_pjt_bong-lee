@@ -7,7 +7,6 @@ import numpy as np
 API_URL = 'http://www.aladin.co.kr/ttb/api/ItemList.aspx'
 API_KEY = 'ttbtmddnjs36641349002'
 
-# ✅ 정규화 카테고리 매핑 기준
 CATEGORY_KEYWORDS = {
     "문학": ["소설", "시", "희곡"],
     "인문": ["인문학", "교양", "철학"],
@@ -83,7 +82,7 @@ def import_books_from_aladin():
                     'publisher': item.get('publisher'),
                     'customer_review_rank': item.get('customerReviewRank', 0),
                     'description': item.get('description', '')[:1000],
-                    'category': category_obj,  # ✅ ForeignKey로 연결
+                    'category': category_obj,
                 }
             )
             if created:
@@ -95,7 +94,7 @@ def import_books_from_aladin():
     return imported
 
 def process_book_vectors():
-    books = Book.objects.filter(vector__isnull=True)  # ✅ 벡터가 없는 책만 선택
+    books = Book.objects.filter(vector__isnull=True)
     if not books.exists():
         print("[INFO] 모든 책에 벡터가 이미 존재합니다.")
         return

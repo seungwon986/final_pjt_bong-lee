@@ -15,6 +15,7 @@ export const useAccountStore = defineStore(
 
     const signUp = async (payload) => {
       const isFormData = payload instanceof FormData;
+
       try {
         await axios({
           method: "POST",
@@ -33,10 +34,9 @@ export const useAccountStore = defineStore(
         const res = await axios.post(`${ACCOUNT_API}/login/`, credentials);
         token.value = res.data.key;
 
-        // ✅ 사용자 정보 요청
         await fetchUserProfile();
 
-        // ✅ 메인 페이지로 이동
+
         router.push("/");
       } catch (err) {
         console.error("로그인 실패:", err.response?.data || err.message);

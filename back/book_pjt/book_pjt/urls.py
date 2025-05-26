@@ -25,7 +25,7 @@ urlpatterns = [
     path('accounts/', include('dj_rest_auth.urls')),
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
 
-    # 🔧 여기에 추가
+
     path('accounts/', include('accounts.urls')),
     path('api/v1/', include('challenges.urls')),
 ]

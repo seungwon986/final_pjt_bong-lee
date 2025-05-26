@@ -3,8 +3,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from .models import User
 from books.models import Category, Book
+from django.contrib.auth import get_user_model
 
-# ✅ 회원가입 시 사용자 추가 필드 입력
 class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField(max_length=30, required=False)
     last_name = serializers.CharField(max_length=30, required=False)
@@ -70,3 +70,32 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'nickname', 'profile_image', 'preferred_books', 'first_name', 'last_name']
+
+class UserSerializer(serializers.ModelSerializer):
+    completed_challenges_count = serializers.SerializerMethodField()
+    joined_challenges_count = serializers.SerializerMethodField()
+    created_challenges_count = serializers.SerializerMethodField()
+
+    preferred_books = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = get_user_model()
+        fields = [
+            'id', 'username', 'nickname', 'email', 'profile_image',
+            'preferred_books',
+            'completed_challenges_count',
+            'joined_challenges_count',
+            'created_challenges_count',
+        ]
+
+    def get_completed_challenges_count(self, user):
+        return user.challengeparticipant_set.filter(success=True).count()
+
+    def get_joined_challenges_count(self, user):
+        return user.challengeparticipant_set.count()
+
+    def get_created_challenges_count(self, user):
+        return user.created_challenges.count()

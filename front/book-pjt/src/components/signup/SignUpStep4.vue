@@ -36,7 +36,6 @@ const categoryNames = ref([])
 const bookTitles = ref([])
 const isSubmitting = ref(false)
 
-// expose 상태를 상위 컴포넌트에서 제어할 수 있게 함
 defineExpose({ isSubmitting })
 
 onMounted(async () => {

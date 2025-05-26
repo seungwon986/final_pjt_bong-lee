@@ -23,43 +23,54 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import axios from 'axios'
-import { useAccountStore } from '@/stores/accounts.js'
+import { ref, watch } from "vue";
+import axios from "axios";
+import { useAccountStore } from "@/stores/accounts.js";
 
-const books = ref([])
-const store = useAccountStore()
-const slider = ref(null)
-
+const books = ref([]);
+const store = useAccountStore();
+const slider = ref(null);
 const fetchRecommend = async () => {
-  if (!store.user?.preferred_books?.length) return
+  if (!store.user?.preferred_books?.length) {
+    console.log("⛔ preferred_books 없음");
+    return;
+  }
 
   try {
-    const res = await axios.post('http://127.0.0.1:8000/api/v1/books/recommend/', {
-      preferred_books: store.user.preferred_books
-    }, {
-      headers: { Authorization: `Token ${store.token}` }
-    })
+    console.log("📨 추천 요청 시작:", store.user.preferred_books);
+    const res = await axios.post(
+      "http://127.0.0.1:8000/api/v1/books/recommend/",
+      {
+        preferred_books: store.user.preferred_books,
+      },
+      {
+        headers: { Authorization: `Token ${store.token}` },
+      }
+    );
 
-    books.value = res.data
+    console.log("📦 추천 도서 응답:", res.data);
+    books.value = res.data;
   } catch (err) {
-    console.error('❌ 추천 도서 불러오기 실패:', err.response?.data || err.message)
+    console.error(
+      "❌ 추천 도서 불러오기 실패:",
+      err.response?.data || err.message
+    );
   }
-}
+};
 
 const slideLeft = () => {
-  slider.value.scrollLeft -= 400
-}
+  slider.value.scrollLeft -= 400;
+};
 
 const slideRight = () => {
-  slider.value.scrollLeft += 400
-}
+  slider.value.scrollLeft += 400;
+};
 
 watch(
   () => store.user?.preferred_books,
   () => fetchRecommend(),
   { immediate: true }
-)
+);
 </script>
 
 <style scoped>
@@ -100,7 +111,7 @@ watch(
   max-width: 150px;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 0.8rem;
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -109,7 +120,7 @@ watch(
 
 .book-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .book-cover {
@@ -146,7 +157,7 @@ watch(
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .slide-btn.left {

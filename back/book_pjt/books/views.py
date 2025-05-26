@@ -9,6 +9,7 @@ from .models import Book, Category
 from .utils import process_book_vectors
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import json 
 
 @api_view(['GET'])
 def book_list(request):
@@ -49,6 +50,8 @@ def generate_book_vectors(request):
 
 @api_view(['POST'])
 def recommend_books(request):
+    import json  # ✅ 반드시 추가!
+
     preferred_ids = request.data.get('preferred_books', [])
     if not preferred_ids:
         return Response({'error': 'preferred_books 값이 필요합니다.'}, status=400)
@@ -56,13 +59,13 @@ def recommend_books(request):
     books = Book.objects.exclude(vector__isnull=True)
     book_map = {book.id: book for book in books}
 
-    # 선택된 벡터 가져오기
     vectors = []
     for book_id in preferred_ids:
         book = book_map.get(book_id)
         if book and book.vector:
             try:
-                vec = np.array(book.vector if isinstance(book.vector, list) else json.loads(book.vector))
+                raw_vector = book.vector if isinstance(book.vector, list) else json.loads(book.vector)
+                vec = np.array(raw_vector).flatten()
                 vectors.append(vec)
             except Exception as e:
                 print(f"[ERROR] 벡터 파싱 실패 (book_id={book_id}): {e}")
@@ -71,8 +74,7 @@ def recommend_books(request):
         return Response({'error': '유효한 벡터를 가진 preferred_books 없음'}, status=400)
 
     mean_vector = np.mean(vectors, axis=0).reshape(1, -1)
-
-    # 모든 도서와의 유사도 계산
+    
     similarity_list = []
     for book in books:
         if book.id in preferred_ids:
@@ -85,7 +87,6 @@ def recommend_books(request):
             except Exception as e:
                 print(f"[ERROR] 유사도 계산 실패 (book.id={book.id}): {e}")
 
-    # 유사도 상위 10개 도서 추천
     similarity_list.sort(reverse=True, key=lambda x: x[0])
     top_books = [book for _, book in similarity_list[:10]]
 

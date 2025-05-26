@@ -1,6 +1,16 @@
 <template>
   <div class="challenge-create-wrapper">
     <h2>챌린지 생성</h2>
+    <div class="form-group">
+      <label for="title">챌린지 제목</label>
+      <input
+        id="title"
+        type="text"
+        v-model="form.title"
+        placeholder="챌린지 이름을 입력하세요"
+        required
+      />
+    </div>
     <form @submit.prevent="submitChallenge">
       <!-- 최대 참여 인원 -->
       <div class="form-group">
@@ -19,44 +29,63 @@
         <label for="category">도서 카테고리</label>
         <select id="category" v-model="form.category" required>
           <option value="" disabled>카테고리 선택</option>
-          <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+          <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+            {{ cat.name }}
+          </option>
         </select>
       </div>
 
-      <!-- 도서명 검색 -->
-      <div class="form-group">
-        <label for="bookSearch">도서명 검색</label>
+      <div class="form-group" v-if="categoryBooks.length && !selectedBook">
+        <label for="bookSearch">도서 검색</label>
         <input
           id="bookSearch"
           type="text"
           v-model="searchQuery"
-          @input="fetchSuggestions"
           placeholder="책 제목을 입력하세요"
           autocomplete="off"
         />
-        <ul v-if="suggestions.length" class="suggestions-list">
-          <li v-for="book in suggestions" :key="book.id" @click="selectBook(book)">
-            {{ book.title }} - {{ book.author }}
+        <ul v-if="filteredBooks.length && searchQuery" class="suggestions-list">
+          <li
+            v-for="book in filteredBooks"
+            :key="book.id"
+            @click="selectBook(book)"
+          >
+            {{ truncate(book.title, 50) }}
+            <span class="author">- {{ book.author }}</span>
           </li>
         </ul>
+
+        <select v-model="form.book" class="form-control mt-2">
+          <option disabled value="">또는 도서를 선택하세요</option>
+          <option v-for="book in categoryBooks" :key="book.id" :value="book.id">
+            {{ truncate(book.title, 60) }} - {{ book.author }}
+          </option>
+        </select>
       </div>
 
-      <!-- 선택된 도서 -->
-      <div class="form-group" v-if="form.book">
+      <div class="form-group selected-book-card" v-if="selectedBook">
         <label>선택 도서</label>
         <div class="selected-book">
-          <img :src="form.book.cover" :alt="form.book.title" />
+          <img :src="selectedBook.cover" :alt="selectedBook.title" />
           <div class="info">
-            <p class="title">{{ form.book.title }}</p>
-            <p class="author">{{ form.book.author }}</p>
+            <p class="title">{{ selectedBook.title }}</p>
+            <p class="author">{{ selectedBook.author }}</p>
           </div>
+          <button type="button" class="btn-cancel" @click="clearSelection">
+            선택 취소
+          </button>
         </div>
       </div>
 
       <!-- 소개글 -->
       <div class="form-group">
         <label for="description">소개글</label>
-        <textarea id="description" v-model="form.description" rows="4" required></textarea>
+        <textarea
+          id="description"
+          v-model="form.description"
+          rows="4"
+          required
+        ></textarea>
       </div>
 
       <!-- 시작일 & 마감일 -->
@@ -84,78 +113,134 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
-import axios from 'axios'
+import { ref, reactive, computed, watch, onMounted } from "vue";
+import axios from "axios";
+import { useAccountStore } from "@/stores/accounts"; // Pinia store
+import { useRouter } from "vue-router";
 
-const categories = ref(["인문", "에세이", "과학", "소설", "기술"])
-const searchQuery = ref('')
-const suggestions = ref([])
+const router = useRouter();
+const store = useAccountStore();
+
+const categories = ref([]);
+const categoryBooks = ref([]);
+const searchQuery = ref("");
 
 const form = reactive({
-  maxParticipants: 5,
-  category: '',
-  book: null,
-  description: '',
-  startDate: '',
-  endDate: ''
-})
+  title: "",
+  description: "",
+  startDate: "",
+  endDate: "",
+  target_books: 1,
+  category: "",
+  book: "",
+});
 
-// 도서 자동완성
-const fetchSuggestions = async () => {
-  if (!searchQuery.value) {
-    suggestions.value = []
-    return
-  }
+const selectedBook = computed(() =>
+  categoryBooks.value.find((book) => book.id === form.book)
+);
+
+const filteredBooks = computed(() =>
+  searchQuery.value
+    ? categoryBooks.value.filter((book) =>
+        book.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )
+    : categoryBooks.value
+);
+
+const truncate = (str, max = 50) =>
+  str.length > max ? str.slice(0, max) + "..." : str;
+
+const fetchCategories = async () => {
   try {
-    const { data } = await axios.get(`/api/books?search=${encodeURIComponent(searchQuery.value)}`)
-    suggestions.value = data
+    const { data } = await axios.get(
+      "http://127.0.0.1:8000/api/v1/books/categories/"
+    );
+    categories.value = data;
   } catch (e) {
-    console.error(e)
+    console.error("카테고리 불러오기 실패", e);
   }
-}
+};
 
-// 도서 선택
+watch(
+  () => form.category,
+  async (newVal) => {
+    if (!newVal) return;
+    try {
+      const { data } = await axios.get(
+        `http://127.0.0.1:8000/api/v1/books?category=${newVal}`
+      );
+      categoryBooks.value = data;
+    } catch (e) {
+      console.error("카테고리 도서 로드 실패", e);
+    }
+  }
+);
+
 function selectBook(book) {
-  form.book = book
-  suggestions.value = []
-  searchQuery.value = book.title
+  form.book = book.id;
+  searchQuery.value = book.title;
 }
 
-// 진행 기간 계산
-const duration = computed(() => {
-  if (!form.startDate || !form.endDate) return ''
-  const start = new Date(form.startDate)
-  const end = new Date(form.endDate)
-  const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
-  return `${diff}일`
-})
+function clearSelection() {
+  form.book = null;
+  searchQuery.value = "";
+}
 
-// 날짜 검증
-watch(() => form.startDate, () => {
-  if (form.endDate && form.endDate < form.startDate) {
-    form.endDate = ''
+watch(
+  () => form.book,
+  (newVal) => {
+    if (newVal && !selectedBook.value) {
+      const book = categoryBooks.value.find((b) => b.id === newVal);
+      if (book) searchQuery.value = book.title;
+    }
   }
-})
+);
 
-// 제출 처리
+const duration = computed(() => {
+  if (!form.startDate || !form.endDate) return "";
+  const start = new Date(form.startDate);
+  const end = new Date(form.endDate);
+  const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  return `${diff}일`;
+});
+
+watch(
+  () => form.startDate,
+  () => {
+    if (form.endDate && form.endDate < form.startDate) {
+      form.endDate = "";
+    }
+  }
+);
+
 const submitChallenge = async () => {
   const payload = {
-    maxParticipants: form.maxParticipants,
-    category: form.category,
-    bookId: form.book?.id,
+    title: form.title,
     description: form.description,
-    startDate: form.startDate,
-    endDate: form.endDate
-  }
+    start_date: form.startDate,
+    end_date: form.endDate,
+    target_books: form.target_books,
+    book: form.book, // foreign key id
+  };
+
   try {
-    await axios.post('/api/challenges', payload)
-    alert('챌린지가 생성되었습니다!')
-    // TODO: 페이지 이동 또는 초기화 등 추가 작업
+    const token = store.token || localStorage.getItem("token");
+    const headers = token ? { Authorization: `Token ${token}` } : {};
+
+    const { data } = await axios.post(
+      "http://127.0.0.1:8000/api/v1/challenges/",
+      payload,
+      { headers }
+    );
+    alert("챌린지가 생성되었습니다!");
+    router.push("/challenges");
   } catch (e) {
-    console.error(e)
-    alert('생성 중 오류가 발생했습니다.')
+    console.error("챌린지 생성 실패:", e.response?.data || e);
+    alert("생성 중 오류가 발생했습니다.");
   }
-}
+};
+
+onMounted(fetchCategories);
 </script>
 
 <style scoped>
@@ -166,11 +251,6 @@ const submitChallenge = async () => {
   background: #ffffff;
   border-radius: 0.75rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-.challenge-create-wrapper h2 {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  color: #2c3e50;
 }
 .form-group {
   margin-bottom: 1rem;
@@ -207,15 +287,26 @@ const submitChallenge = async () => {
 .suggestions-list li {
   padding: 0.5rem;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.suggestions-list li:hover {
-  background: #f0f2f5;
+.suggestions-list li .author {
+  color: #888;
+  font-size: 0.875rem;
+}
+
+.selected-book-card {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
 }
 .selected-book {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+  gap: 1rem;
 }
 .selected-book img {
   width: 60px;
@@ -223,10 +314,26 @@ const submitChallenge = async () => {
   object-fit: cover;
   border-radius: 0.25rem;
 }
-.selected-book .info p {
-  margin: 0;
+.selected-book .info {
+  flex: 1;
+}
+.selected-book .info .title {
+  font-weight: bold;
+}
+.selected-book .info .author {
+  color: #555;
   font-size: 0.875rem;
-  color: #2c3e50;
+}
+.btn-cancel {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-weight: bold;
+  cursor: pointer;
+}
+.btn-cancel:hover {
+  text-decoration: underline;
 }
 .btn-submit {
   width: 100%;
